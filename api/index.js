@@ -8,7 +8,6 @@
 
     // --- CRITICAL PDFLoader Configuration for Vercel ---
     // Ensure pdf.js can find its worker files. This path is relative to the *serverless function's root*.
-    // Using a more explicit path and ensuring it's set before PDFLoader is used.
     process.env.LANGCHAIN_PDFJS_PATH = process.env.LANGCHAIN_PDFJS_PATH || '/var/task/node_modules/pdfjs-dist';
 
     // --- IMPORTANT: Environment variable for API Key ---
@@ -118,15 +117,15 @@
         }
 
         try {
-            // Convert Buffer to a Readable Stream, which PDFLoader might prefer or handle better
-            // in some serverless environments.
-            const { Readable } = require('stream');
-            const readableStream = new Readable();
-            readableStream.push(fileBuffer);
-            readableStream.push(null); // End the stream
+            // CRITICAL CHANGE: Create a Blob from the Buffer
+            // We need to polyfill Blob for Node.js environments if not globally available,
+            // or ensure it's imported if used. Node.js 18+ has Blob globally.
+            // If running on an older Node.js runtime, you might need 'node-fetch' or similar.
+            // Vercel uses Node.js 18+ (which we specified in package.json), so Blob should be available.
+            const pdfBlob = new Blob([fileBuffer], { type: mimeType });
 
-            // Use the stream with PDFLoader
-            const loader = new PDFLoader(readableStream);
+            // Pass the Blob directly to PDFLoader
+            const loader = new PDFLoader(pdfBlob);
             const docs = await loader.load();
 
             if (docs.length === 0) {
@@ -143,8 +142,6 @@
             res.json({ message: 'Document processed successfully. You can now ask questions about its content.' });
         } catch (error) {
             console.error("Error processing document:", error);
-            // Re-throw the error to ensure Vercel logs the full stack trace
-            // or return a more specific error message based on the type of error.
             res.status(500).json({ error: "Failed to process document.", details: error.message });
         }
     });

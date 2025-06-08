@@ -6,9 +6,10 @@
     const { RecursiveCharacterTextSplitter } = require('langchain/text_splitter');
     const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-    // --- CRITICAL PDFLoader Configuration for Vercel ---//
+    // --- CRITICAL PDFLoader Configuration for Vercel ---
     // Ensure pdf.js can find its worker files. This path is relative to the *serverless function's root*.
-    process.env.LANGCHAIN_PDFJS_PATH = process.env.LANGCHAIN_PDFJS_PATH || '/node_modules/pdfjs-dist';
+    // Using a more explicit path and ensuring it's set before PDFLoader is used.
+    process.env.LANGCHAIN_PDFJS_PATH = process.env.LANGCHAIN_PDFJS_PATH || '/var/task/node_modules/pdfjs-dist';
 
     // --- IMPORTANT: Environment variable for API Key ---
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -42,7 +43,6 @@
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Endpoint for structured Gemini queries (e.g., for background themes)
-    // CRITICAL CHANGE: Use '/api/gemini-structured-query' for the full path
     app.post('/api/gemini-structured-query', async (req, res) => {
         const { prompt, schema } = req.body;
 
@@ -71,7 +71,6 @@
 
 
     // Endpoint for text generation
-    // CRITICAL CHANGE: Use '/api/chat' for the full path
     app.post('/api/chat', async (req, res) => {
         const userMessage = req.body.message;
         const chatHistory = req.body.chatHistory || []; // Get history from frontend
@@ -106,7 +105,6 @@
     });
 
     // Endpoint for file upload and processing
-    // CRITICAL CHANGE: Use '/api/upload' for the full path
     app.post('/api/upload', upload.single('document'), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded.' });
@@ -120,10 +118,15 @@
         }
 
         try {
-            // PDFLoader needs to be able to find the pdf.worker.js file.
-            // By default, it expects it in node_modules/pdfjs-dist.
-            // We set LANGCHAIN_PDFJS_PATH to ensure it points there relative to the function's root.
-            const loader = new PDFLoader(fileBuffer); // Pass buffer directly to PDFLoader
+            // Convert Buffer to a Readable Stream, which PDFLoader might prefer or handle better
+            // in some serverless environments.
+            const { Readable } = require('stream');
+            const readableStream = new Readable();
+            readableStream.push(fileBuffer);
+            readableStream.push(null); // End the stream
+
+            // Use the stream with PDFLoader
+            const loader = new PDFLoader(readableStream);
             const docs = await loader.load();
 
             if (docs.length === 0) {
@@ -140,19 +143,19 @@
             res.json({ message: 'Document processed successfully. You can now ask questions about its content.' });
         } catch (error) {
             console.error("Error processing document:", error);
+            // Re-throw the error to ensure Vercel logs the full stack trace
+            // or return a more specific error message based on the type of error.
             res.status(500).json({ error: "Failed to process document.", details: error.message });
         }
     });
 
     // Endpoint to clear document context (important for serverless functions)
-    // CRITICAL CHANGE: Use '/api/clear-document-context' for the full path
     app.post('/api/clear-document-context', (req, res) => {
         uploadedDocumentText = null;
         res.json({ message: 'Document context cleared.' });
     });
 
     // Basic health check endpoint
-    // CRITICAL CHANGE: Use '/api' for the health check
     app.get('/api', (req, res) => {
         res.send('Campus Connect AI Backend Serverless Function is running!');
     });

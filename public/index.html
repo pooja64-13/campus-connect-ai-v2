@@ -1,0 +1,2808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Connect AI - Your Academic Companion</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* CSS Variables for Theme */
+        :root {
+            /* Dark Mode (Default) */
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e; /* Gradient end */
+            --bg-app-overlay: rgba(30, 30, 30, 0.6); /* Increased transparency for animations */
+            --bg-sidebar: rgba(15, 15, 15, 0.7); /* Increased transparency */
+            --bg-header: rgba(25, 25, 25, 0.7); /* Increased transparency */
+            --bg-message-user: rgba(255, 193, 7, 0.1); /* Golden tint, more transparent */
+            --bg-message-bot: rgba(35, 35, 35, 0.5); /* More transparent */
+            --bg-input: rgba(40, 40, 40, 0.6); /* More transparent */
+            --bg-history-item: rgba(30, 30, 30, 0.6); /* More transparent */
+            --bg-typing-indicator: rgba(35, 35, 35, 0.5); /* More transparent */
+            --bg-suggestion: rgba(255, 193, 7, 0.08); /* Golden tint, more transparent */
+            --bg-login-box: rgba(25, 25, 25, 0.6); /* More transparent */
+
+            --text-primary: rgba(255, 255, 255, 0.9);
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+            --text-accent: #FFD700; /* Golden color */
+            --text-button-dark: #0a0a0a;
+
+            --border-color: rgba(255, 215, 0, 0.15); /* More subtle golden border */
+            --shadow-color-light: rgba(255, 215, 0, 0.25); /* More subtle golden shadow */
+            --shadow-color-dark: rgba(0, 0, 0, 0.5); /* More subtle shadow */
+
+            /* Three.js Particle color (for Chat App) */
+            --particle-color-chat: #FFD700; /* Golden particles for chat app background */
+
+            /* Falling Squares color (for Login page) */
+            --square-color-login: #FFD700; /* Golden yellow for login squares */
+
+            --accent-btn-bg: linear-gradient(135deg, #FFD700, #FFA000); /* Golden gradient */
+
+            --status-online: #4ade80; /* Green */
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #e0e2e5;
+            --bg-tertiary: #d0d2d5;
+            --bg-app-overlay: rgba(255, 255, 255, 0.7); /* Increased transparency for animations */
+            --bg-sidebar: rgba(240, 240, 240, 0.7); /* Increased transparency */
+            --bg-header: rgba(230, 230, 230, 0.7); /* Increased transparency */
+            --bg-message-user: rgba(173, 216, 230, 0.25); /* Light blue tint, more transparent */
+            --bg-message-bot: rgba(240, 240, 240, 0.6); /* More transparent */
+            --bg-input: rgba(230, 230, 230, 0.7); /* More transparent */
+            --bg-history-item: rgba(220, 220, 220, 0.6); /* More transparent */
+            --bg-typing-indicator: rgba(230, 230, 230, 0.6); /* More transparent */
+            --bg-suggestion: rgba(173, 216, 230, 0.2); /* Light blue tint, more transparent */
+            --bg-login-box: rgba(240, 240, 240, 0.7); /* More transparent */
+
+            --text-primary: #333;
+            --text-secondary: #555;
+            --text-tertiary: #888;
+            --text-accent: #4682b4; /* Steel blue */
+            --text-button-dark: #f0f2f5;
+
+            --border-color: rgba(70, 130, 180, 0.2); /* More subtle */
+            --shadow-color-light: rgba(70, 130, 180, 0.2); /* More subtle */
+            --shadow-color-dark: rgba(0, 0, 0, 0.12); /* More subtle */
+
+            /* Light mode specific for Three.js (Chat App) */
+            --particle-color-chat: #4682b4; /* Steel blue for chat app Three.js background */
+
+            /* Light mode specific for Falling Squares (Login page) */
+            --square-color-login: #c0c0c0; /* Silver/light gray for login squares in light mode */
+            --accent-btn-bg: linear-gradient(135deg, #4682b4, #5f9ea0); /* Steel blue gradient */
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%; /* Ensure html and body take full viewport height */
+            overflow: hidden; /* Prevent scroll on body */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary); /* Base background for body */
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.5s ease; /* Smooth transition for theme change */
+        }
+
+        /* Three.js Canvas - NOW FOR MAIN CHAT APP */
+        #threeJsCanvas {
+            position: fixed; /* Fixed position to cover entire viewport */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; /* Behind all content */
+            display: none; /* Controlled by JS to show only on chat app */
+        }
+
+        /* Falling Squares animation for the LOGIN PAGE background */
+        .login-page-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -2; /* Even further behind login content */
+            background: var(--bg-primary); /* Base color for the background behind squares */
+            display: none; /* Controlled by JS to show only on login */
+        }
+
+        .login-page-background .square {
+            position: absolute;
+            background: var(--square-color-login);
+            opacity: 0.3; /* Increased opacity for clarity */
+            animation: squareFall 15s linear infinite;
+        }
+
+        @keyframes squareFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3; /* Clearly visible */
+            }
+            80% {
+                opacity: 0.3; /* Clearly visible */
+            }
+            100% {
+                transform: translateY(calc(100vh + 100px)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+
+        /* Full page container for all main UI components */
+        .full-page-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex; /* Using flex to center content */
+            justify-content: center;
+            align-items: center;
+            z-index: 1; /* Main container for app and overall background */
+            overflow: hidden; /* Prevent scroll on this container */
+            background: transparent; /* Allow specific backgrounds to show through */
+        }
+
+        /* Login Page Styles */
+        .login-container {
+            position: relative; /* Ensure it's positioned on top of overall background */
+            z-index: 10;
+            display: flex; /* Flexbox to center content */
+            align-items: center;
+            justify-content: center;
+            height: 100%; /* Takes full height of .full-page-container */
+            width: 100%;
+        }
+
+        .login-box {
+            background: var(--bg-login-box); /* Use transparent background */
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 15px 30px var(--shadow-color-dark);
+            animation: loginSlideIn 1s ease-out;
+            z-index: 1; /* Ensure it sits on top of full-page background */
+            border: 1px solid var(--border-color); /* Subtle border for login */
+        }
+
+        @keyframes loginSlideIn {
+            from { opacity: 0; transform: translateY(50px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .login-header h1 {
+            color: var(--text-accent);
+            font-size: 28px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 15px var(--shadow-color-light);
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-accent);
+            font-size: 13px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-input);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            box-shadow: 0 0 12px var(--shadow-color-light);
+            background: var(--bg-input);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .login-btn, .register-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-btn-bg);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-button-dark);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .login-btn:hover, .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--shadow-color-light);
+        }
+
+        .switch-auth-mode {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .switch-auth-mode span {
+            cursor: pointer;
+            color: var(--text-accent);
+            text-decoration: underline;
+            margin-left: 5px;
+        }
+
+        /* Chat Container Styles */
+        .chat-app {
+            display: none; /* Hidden by default, shown by JS */
+            position: relative; /* Crucial for z-index and clipping children */
+            z-index: 10; /* Make sure it's above other elements */
+            height: 90vh; /* Adjusted for better fit on typical laptops */
+            width: 90vw; /* Adjusted for better fit on typical laptops */
+            max-width: 1200px; /* Limit max width for very large screens */
+            max-height: 800px; /* Limit max height */
+            background: var(--bg-app-overlay); /* Semi-transparent overlay for app */
+            backdrop-filter: blur(15px);
+            border-radius: 15px; /* Rounded corners for the entire app */
+            box-shadow: 0 15px 30px var(--shadow-color-dark);
+            animation: chatSlideIn 1s ease-out;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 280px 1fr; /* Desktop layout: sidebar 280px, main chat fills rest */
+            border: 1px solid var(--border-color); /* Subtle border for the app */
+        }
+
+        @keyframes chatSlideIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background: var(--bg-sidebar);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+            border-right: 1px solid rgba(255,255,255,0.05); /* Subtle separator */
+        }
+        body.light-mode .sidebar {
+            border-right: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            color: var(--text-accent);
+        }
+
+        .new-chat-btn {
+            background: var(--text-accent);
+            color: var(--text-button-dark);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .new-chat-btn:hover {
+            background: var(--accent-btn-bg);
+            transform: translateY(-1px);
+            color: var(--text-button-dark);
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+
+        .chat-history::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-history::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1); /* Dark scrollbar track */
+            border-radius: 10px;
+        }
+
+        .chat-history::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1); /* Light scrollbar thumb */
+            border-radius: 10px;
+            border: 2px solid transparent;
+        }
+
+        .chat-history::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Light mode scrollbar */
+        body.light-mode .chat-history::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        body.light-mode .chat-history::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+        }
+        body.light-mode .chat-history::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.3);
+        }
+
+
+        .history-item {
+            background: var(--bg-history-item);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid transparent;
+        }
+
+        .history-item:hover {
+            background: rgba(50, 50, 50, 0.6);
+            border: 1px solid var(--border-color);
+        }
+        body.light-mode .history-item:hover {
+            background: rgba(200, 200, 200, 0.6);
+        }
+
+
+        .history-item.active {
+            background: var(--text-accent);
+            color: var(--text-button-dark);
+            font-weight: 600;
+            border: 1px solid var(--text-accent);
+        }
+
+        .history-item-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+        }
+
+        .history-item-actions {
+            display: none;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .history-item:hover .history-item-actions {
+            display: flex;
+        }
+
+        .history-item-actions button {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 3px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .history-item-actions button:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        body.light-mode .history-item-actions button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Main Chat Area */
+        .main-chat-area {
+            display: flex;
+            flex-direction: column;
+            flex: 1; /* Allows it to take available space */
+            min-height: 0; /* Important for flex items with overflow */
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-header);
+            color: var(--text-accent);
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px var(--shadow-color-dark);
+            display: flex;
+            flex-direction: column; /* Stack elements vertically */
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 5px; /* Space between elements */
+            flex-shrink: 0; /* Prevent header from shrinking */
+            border-bottom: 1px solid rgba(255,255,255,0.05); /* Subtle separator */
+        }
+        body.light-mode .header {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .header .top-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%; /* Take full width of header */
+        }
+        .header .top-line .left-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            margin: 0; /* Remove default margin */
+            font-weight: 600;
+            color: var(--text-accent);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .user-info {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-align: right; /* Align to right within its container */
+            line-height: 1.3;
+        }
+        body.light-mode .user-info {
+            color: var(--text-secondary);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: var(--status-online);
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 8px var(--status-online);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* Mobile Menu Toggle (Hamburger Icon) - HIDDEN for laptop-only */
+        .mobile-menu-toggle {
+            display: none;
+        }
+
+
+        /* Chat Area (where messages and animations inside chatbot go) */
+        .chat-container {
+            flex: 1; /* Allows it to take available space */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Crucial for clipping internal animations */
+            position: relative; /* Set positioning context for children animations */
+            background: transparent; /* Let animations show through */
+            min-height: 0; /* Important for flex items with overflow */
+        }
+
+        .messages {
+            flex: 1; /* Allow messages to take up available space */
+            overflow-y: auto; /* Enable scrolling for messages */
+            padding: 20px;
+            scroll-behavior: smooth;
+            background: transparent; /* Crucial: let animations show through */
+            position: relative;
+            z-index: 1; /* Messages should be on top of animations */
+            min-height: 0; /* Important for flex items with overflow */
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        .messages::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .messages::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            border: 2px solid transparent;
+        }
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        body.light-mode .messages::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        body.light-mode .messages::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+        }
+        body.light-mode .messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.3);
+        }
+
+        .message {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: flex-start;
+            animation: messageSlideIn 0.5s ease-out;
+        }
+
+        @keyframes messageSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message.user .message {
+            animation: messageSlideInUser 0.5s ease-out;
+        }
+
+        @keyframes messageSlideInUser {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 15px;
+            margin: 0 10px;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px var(--shadow-color-light); /* Golden glow for avatar */
+            border: 1px solid var(--border-color); /* Golden border for avatar */
+        }
+
+        .user .message-avatar {
+            background: var(--accent-btn-bg);
+            color: var(--text-button-dark);
+        }
+
+        .bot .message-avatar {
+            background: linear-gradient(135deg, #a0522d, #8b4513); /* Sienna/Chocolate for bot */
+            color: white;
+            box-shadow: 0 0 10px rgba(139, 69, 19, 0.4); /* Brownish glow for bot */
+            border: 1px solid rgba(139, 69, 19, 0.2);
+        }
+        body.light-mode .bot .message-avatar {
+            background: linear-gradient(135deg, #778899, #6a809b); /* Slate gray for bot */
+            box-shadow: 0 0 10px rgba(105, 120, 135, 0.3);
+            border: 1px solid rgba(105, 120, 135, 0.1);
+        }
+
+
+        .message-content {
+            max-width: 65%;
+            padding: 12px 18px;
+            border-radius: 15px;
+            line-height: 1.5;
+            position: relative;
+            backdrop-filter: blur(8px);
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .user .message-content {
+            background: var(--bg-message-user);
+            border-bottom-right-radius: 8px;
+            border: 1px solid var(--border-color); /* Golden border */
+        }
+
+        .bot .message-content {
+            background: var(--bg-message-bot);
+            border-bottom-left-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Lighter border */
+        }
+        body.light-mode .user .message-content {
+            background: var(--bg-message-user);
+            border: 1px solid var(--border-color);
+        }
+        body.light-mode .bot .message-content {
+            background: var(--bg-message-bot);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+
+        .timestamp {
+            font-size: 10px;
+            opacity: 0.5;
+            margin-top: 6px;
+            text-align: right;
+            color: var(--text-secondary);
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            background: var(--bg-typing-indicator);
+            border-radius: 15px;
+            border-bottom-left-radius: 8px;
+            margin-left: 50px;
+            width: fit-content;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 18px;
+        }
+        body.light-mode .typing-indicator {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            background: var(--text-accent);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+            box-shadow: 0 0 8px var(--shadow-color-light);
+        }
+
+        .dot:nth-child(1) { animation-delay: 0s; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0) scale(1); }
+            30% { transform: translateY(-8px) scale(1.2); }
+        }
+
+        /* Input Area (Search Bar) */
+        .input-area {
+            padding: 15px 20px;
+            background: var(--bg-header); /* Use header background, which is transparent */
+            backdrop-filter: blur(10px);
+            flex-shrink: 0; /* Crucial: prevent it from shrinking */
+            border-top: 1px solid rgba(255,255,255,0.05); /* Subtle separator */
+        }
+        body.light-mode .input-area {
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .input-container {
+            display: flex;
+            align-items: flex-end;
+            background: var(--bg-input);
+            border-radius: 25px;
+            padding: 6px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 10px rgba(0,0,0,0.15); /* Subtle shadow for input */
+            border: 1px solid rgba(255,255,255,0.05); /* Subtle border */
+        }
+        body.light-mode .input-container {
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .input-container:focus-within {
+            box-shadow: 0 0 15px var(--shadow-color-light);
+            transform: translateY(-1px);
+        }
+
+        #messageInput {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 10px 15px;
+            background: transparent;
+            font-size: 15px;
+            resize: none;
+            max-height: 100px;
+            min-height: 20px;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        #messageInput::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        #attachButton {
+            background: rgba(255, 215, 0, 0.15); /* Golden tinted */
+            color: var(--text-accent);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+        }
+
+        #attachButton:hover {
+            transform: scale(1.1);
+            background: rgba(255, 215, 0, 0.3);
+        }
+        body.light-mode #attachButton {
+            background: rgba(70, 130, 180, 0.15);
+            color: var(--text-accent);
+            box-shadow: 0 0 10px rgba(70, 130, 180, 0.15);
+        }
+        body.light-mode #attachButton:hover {
+            background: rgba(70, 130, 180, 0.3);
+        }
+
+        #sendButton {
+            background: var(--accent-btn-bg);
+            color: var(--text-button-dark);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--shadow-color-light);
+        }
+
+        #sendButton:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 4px 15px var(--shadow-color-light);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Audio Toggle Button Styles */
+        .audio-toggle-btn {
+            background: rgba(255, 215, 0, 0.15); /* Golden tinted */
+            color: var(--text-accent);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+        }
+
+        .audio-toggle-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 215, 0, 0.3);
+        }
+        body.light-mode #audioToggleBtn {
+            background: rgba(70, 130, 180, 0.15);
+            color: var(--text-accent);
+            box-shadow: 0 0 10px rgba(70, 130, 180, 0.15);
+        }
+        body.light-mode #audioToggleBtn:hover {
+            background: rgba(70, 130, 180, 0.3);
+        }
+
+        .audio-toggle-btn.active {
+            background: var(--accent-btn-bg); /* Golden gradient when active */
+            color: var(--text-button-dark);
+            box-shadow: 0 0 15px var(--shadow-color-light);
+        }
+        body.light-mode .audio-toggle-btn.active {
+            background: var(--accent-btn-bg);
+            color: var(--text-button-dark);
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-secondary);
+        }
+
+        .welcome-message h2 {
+            color: var(--text-accent);
+            margin-bottom: 12px;
+            font-size: 26px;
+            text-shadow: 0 0 15px var(--shadow-color-light);
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .suggestion {
+            background: var(--bg-suggestion);
+            color: var(--text-accent);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+            /* New: Initial state for animation */
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInSlideUp 0.5s ease-out forwards;
+        }
+
+        /* Animation for suggestions appearing */
+        @keyframes fadeInSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stagger animation for multiple suggestions */
+        .suggestion:nth-child(1) { animation-delay: 0.1s; }
+        .suggestion:nth-child(2) { animation-delay: 0.2s; }
+        .suggestion:nth-child(3) { animation-delay: 0.3s; }
+        .suggestion:nth-child(4) { animation-delay: 0.4s; }
+        .suggestion:nth-child(5) { animation-delay: 0.5s; }
+        .suggestion:nth-child(6) { animation-delay: 0.6s; }
+        /* Add more as needed based on max number of suggestions */
+
+
+        .suggestion:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px 20px var(--shadow-color-light);
+            background: rgba(255, 193, 7, 0.1);
+        }
+        body.light-mode .suggestion {
+            background: var(--bg-suggestion);
+            border: 1px solid var(--border-color);
+        }
+        body.light-mode .suggestion:hover {
+            background: rgba(173, 216, 230, 0.2);
+            box-shadow: 0 6px 20px var(--shadow-color-light);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: auto; /* Push to bottom in sidebar */
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            justify-content: center; /* Center horizontally in sidebar */
+            flex-shrink: 0; /* Prevent it from shrinking */
+        }
+        body.light-mode .theme-toggle-container {
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle-container span {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        body.light-mode .slider {
+            background-color: #ccc; /* Ensure light mode slider is grey */
+        }
+        body.light-mode input:checked + .slider {
+            background-color: var(--text-accent); /* Blue for light mode */
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--text-accent); /* Golden for dark mode, Blue for light mode */
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--text-accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Generic Modal (for alerts, confirms, prompts) */
+        .generic-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Higher than mood/topic modal */
+            backdrop-filter: blur(8px);
+        }
+        .generic-modal-content {
+            background: var(--bg-app-overlay);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px var(--shadow-color-dark);
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .generic-modal-content h3 {
+            color: var(--text-accent);
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        .generic-modal-content p {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+        .generic-modal-content input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        .generic-modal-content input[type="text"]::placeholder {
+            color: var(--text-tertiary);
+        }
+        .generic-modal-buttons button {
+            background: var(--accent-btn-bg);
+            color: var(--text-button-dark);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            margin: 0 5px;
+        }
+        .generic-modal-buttons button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .generic-modal-buttons .cancel-btn {
+            background: var(--bg-history-item); /* A slightly darker subtle background */
+            color: var(--text-primary);
+        }
+        .generic-modal-buttons .cancel-btn:hover {
+            background: rgba(50, 50, 50, 0.6);
+        }
+        body.light-mode .generic-modal-buttons .cancel-btn {
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+        body.light-mode .generic-modal-buttons .cancel-btn:hover {
+            background: rgba(230, 230, 230, 0.8);
+        }
+        .action-button {
+            background: var(--accent-btn-bg);
+            color: var(--text-button-dark);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .action-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px var(--shadow-color-light);
+        }
+        .action-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+
+        /* Mood/Topic Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Above everything else */
+            backdrop-filter: blur(8px);
+        }
+
+        .mood-topic-modal {
+            background: var(--bg-app-overlay);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px var(--shadow-color-dark);
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+            border: 1px solid var(--border-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .mood-topic-modal h2 {
+            color: var(--text-accent);
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .mood-options, .topic-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .mood-option, .topic-option {
+            background: var(--bg-suggestion);
+            color: var(--text-accent);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .mood-option:hover, .topic-option:hover, .mood-option.selected, .topic-option.selected {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 15px var(--shadow-color-light);
+            background: var(--accent-btn-bg); /* Use accent color for selected */
+            color: var(--text-button-dark);
+        }
+        body.light-mode .mood-option:hover, body.light-mode .topic-option:hover, body.light-mode .mood-option.selected, body.light-mode .mood-option.selected {
+            background: var(--accent-btn-bg);
+            color: var(--text-button-dark);
+        }
+
+        .modal-buttons {
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            background: var(--accent-btn-bg);
+            color: var(--text-button-dark);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+
+        .modal-buttons button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="threeJsCanvas"></canvas>
+    <div class="login-page-background" id="loginPageBackground"></div>
+
+    <div class="full-page-container">
+        <div class="login-container" id="loginPage">
+            <div class="login-box">
+                <div class="login-header">
+                    <h1>🎓 Campus Connect AI</h1>
+                    <p id="authPrompt">Login to your account</p>
+                </div>
+                <form id="authForm" onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="loginEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" name="loginPassword" placeholder="Enter your password" required>
+                    </div>
+
+                    <!-- Additional fields for registration, hidden by default -->
+                    <div class="form-group" id="registerUserNameGroup" style="display: none;">
+                        <label for="registerUserName">Full Name</label>
+                        <input type="text" id="registerUserName" name="registerUserName" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group" id="registerRollNumberGroup" style="display: none;">
+                        <label for="registerRollNumber">Roll Number</label>
+                        <input type="text" id="registerRollNumber" name="registerRollNumber" placeholder="Enter your roll number">
+                    </div>
+
+                    <button type="submit" class="login-btn" id="authSubmitBtn" onclick="handleLogin()">Login 🎓</button>
+                </form>
+                
+                <div class="switch-auth-mode">
+                    <span id="switchAuthText">Don't have an account?</span> 
+                    <span id="switchAuthBtn" onclick="toggleAuthMode()">Register</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="moodTopicModal" style="display: none;">
+            <div class="mood-topic-modal">
+                <h2 id="modalTitleMoodTopic">How are you feeling today, <span id="modalUserName"></span>?</h2>
+                <div class="mood-options">
+                    <div class="mood-option" data-mood="happy">😊 Happy</div>
+                    <div class="mood-option" data-mood="stressed">😓 Stressed</div>
+                    <div class="mood-option" data-mood="confused">😕 Confused</div>
+                    <div class="mood-option" data-mood="motivated">⚡ Motivated</div>
+                    <div class="mood-option" data-mood="curious">🤔 Curious</div>
+                </div>
+
+                <h2>What topic do you want to chat about?</h2>
+                <div class="topic-options">
+                    <div class="topic-option" data-topic="general">General Chat 💬</div>
+                    <div class="topic-option" data-topic="math">Math 🧮</div>
+                    <div class="topic-option" data-topic="science">Science 🔬</div>
+                    <div class="topic-option" data-topic="programming">Programming 💻</div>
+                    <div class="topic-option" data-topic="history">History 📜</div>
+                    <div class="topic-option" data-topic="college life">College Life 🎓</div>
+                    <div class="topic-option" data-topic="exam prep">Exam Prep 📝</div>
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="startChatFromModal()">Start Chat</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="genericModal" class="generic-modal-overlay" style="display: none;">
+            <div class="generic-modal-content">
+                <h3 id="genericModalTitle"></h3>
+                <p id="genericModalMessage"></p>
+                <div id="genericModalInputContainer" style="display: none;">
+                    <input type="text" id="genericModalInput" placeholder="" />
+                </div>
+                <div class="generic-modal-buttons">
+                    <button id="genericModalConfirmBtn">OK</button>
+                    <button id="genericModalCancelBtn" style="display: none;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="chat-app" id="chatApp">
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>History</h2>
+                    <button class="new-chat-btn" onclick="startNewChat()">+ New Chat</button>
+                </div>
+                <div class="chat-history" id="chatHistory">
+                </div>
+                <div class="theme-toggle-container">
+                    <span>Dark Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Light Mode</span>
+                </div>
+                <div class="user-info" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+                    <div id="welcomeUserSidebar"></div>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+            <div class="main-chat-area">
+                <div class="header">
+                    <div class="top-line">
+                        <p class="left-status">
+                            <span class="status-indicator"></span>Campus Connect AI
+                        </p>
+                        <div class="user-info" id="userInfo">
+                            <div id="welcomeUserHeader"></div>
+                        </div>
+                    </div>
+                    <h1>Your personalized academic assistant</h1>
+                </div>
+
+                <div class="chat-container" id="chatContainer">
+                    <div class="messages" id="messages">
+                    </div>
+                    <div class="action-buttons-container">
+                        <button id="summarizeChatBtn" class="action-button">✨ Summarize Chat</button>
+                        <button id="creativePromptBtn" class="action-button">💡 Creative Prompt</button>
+                        <button id="changeBackgroundBtn" class="action-button">🎨 Change Chat Background</button>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-container">
+                        <input type="file" id="fileInput" style="display: none;" accept=".pdf,.txt,.docx" onchange="handleFileUpload(event)">
+                        <button id="attachButton" onclick="document.getElementById('fileInput').click()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                        <textarea
+                            id="messageInput"
+                            placeholder="Ask about studies, campus life, or anything else..."
+                            rows="1"
+                            onkeypress="handleKeyPress(event)"
+                            oninput="adjustTextareaHeight(this)"
+                        ></textarea>
+                        <div class="input-actions">
+                            <button id="audioToggleBtn" class="audio-toggle-btn">
+                                <!-- SVG icon will be updated by JS -->
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                                    <path d="M11 5L6 9H2v6h4l5 4zM19.07 4.93A10 10 0 0 1 20 12c0 2.21-.9 4.21-2.34 5.66M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                </svg>
+                            </button>
+                            <button id="voiceBtn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </button>
+                            <button id="sendButton" onclick="sendMessage()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22,2 15,22 11,13 2,9"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION: Use window.location.origin for absolute path in testing environment ---
+        // When deployed on Vercel, requests to /api will automatically route to serverless functions.
+        // But in the blob/iframe testing context, we need the full origin.
+        const BACKEND_BASE_URL = window.location.origin + '/api';
+
+        // Global variables for user information (no Firebase globals needed)
+        let currentUserProfile = null; // Will store name and roll from localStorage
+
+        // Standard JS variables
+        let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+        let currentChatId = null;
+        let selectedMood = '';
+        let selectedTopic = '';
+        let uploadedDocumentText = ''; // Frontend does not directly use this but ensures context clearing
+        let audioEnabled = localStorage.getItem('audioEnabled') === 'true';
+
+        // Get elements for login/register form toggling
+        const loginEmailGroup = document.getElementById('loginEmailGroup');
+        const loginPasswordGroup = document.getElementById('loginPasswordGroup');
+        const registerUserNameGroup = document.getElementById('registerUserNameGroup');
+        const registerRollNumberGroup = document.getElementById('registerRollNumberGroup');
+        const authPrompt = document.getElementById('authPrompt');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const switchAuthText = document.getElementById('switchAuthText');
+        const switchAuthBtn = document.getElementById('switchAuthBtn');
+
+        let isLoginMode = true; // State for login/register form
+
+        // Set the worker source for pdf.js
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+        }
+
+        // Three.js Global Variables (for Chat App background)
+        let scene, camera, renderer, particles, particleMaterial, particleGeometry;
+        let mouseX = 0, mouseY = 0;
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+
+        // Falling Squares Global Variable (for Login Page background)
+        let squareInterval;
+
+        // Generic Modal Elements (for alerts, confirms, prompts)
+        const genericModal = document.getElementById("genericModal");
+        const genericModalTitle = document.getElementById("genericModalTitle");
+        const genericModalMessage = document.getElementById("genericModalMessage");
+        const genericModalConfirmBtn = document.getElementById("genericModalConfirmBtn");
+        const genericModalCancelBtn = document.getElementById("genericModalCancelBtn");
+        const genericModalInputContainer = document.getElementById("genericModalInputContainer");
+        const genericModalInput = document.getElementById("genericModalInput");
+
+        // --- Custom Generic Modal Functions (exposed globally for inline script) ---
+        window.showAlert = function(title, message) {
+            return new Promise(resolve => {
+                genericModalTitle.textContent = title;
+                genericModalMessage.textContent = message;
+                genericModalInputContainer.style.display = 'none';
+                genericModalConfirmBtn.textContent = 'OK';
+                genericModalCancelBtn.style.display = 'none';
+                genericModal.style.display = 'flex';
+
+                const confirmHandler = () => {
+                    genericModal.style.display = 'none';
+                    genericModalConfirmBtn.removeEventListener('click', confirmHandler);
+                    resolve(true);
+                };
+                genericModalConfirmBtn.addEventListener('click', confirmHandler);
+            });
+        }
+
+        window.showConfirm = function(title, message) {
+            return new Promise(resolve => {
+                genericModalTitle.textContent = title;
+                genericModalMessage.textContent = message;
+                genericModalInputContainer.style.display = 'none';
+                genericModalConfirmBtn.textContent = 'Yes';
+                genericModalCancelBtn.textContent = 'No';
+                genericModalCancelBtn.style.display = 'inline-block';
+                genericModal.style.display = 'flex';
+
+                const confirmHandler = () => {
+                    genericModal.style.display = 'none';
+                    genericModalConfirmBtn.removeEventListener('click', confirmHandler);
+                    genericModalCancelBtn.removeEventListener('click', cancelHandler);
+                    resolve(true);
+                };
+                const cancelHandler = () => {
+                    genericModal.style.display = 'none';
+                    genericModalConfirmBtn.removeEventListener('click', confirmHandler);
+                    genericModalCancelBtn.removeEventListener('click', cancelHandler);
+                    resolve(false);
+                };
+                genericModalConfirmBtn.addEventListener('click', confirmHandler);
+                genericModalCancelBtn.addEventListener('click', cancelHandler);
+            });
+        }
+
+        window.showPrompt = function(title, message, placeholder = "") {
+            return new Promise(resolve => {
+                genericModalTitle.textContent = title;
+                genericModalMessage.textContent = message;
+                genericModalInput.value = '';
+                genericModalInput.placeholder = placeholder;
+                genericModalInputContainer.style.display = 'block';
+                genericModalConfirmBtn.textContent = 'Submit';
+                genericModalCancelBtn.textContent = 'Cancel';
+                genericModalCancelBtn.style.display = 'inline-block';
+                genericModal.style.display = 'flex';
+
+                const submitHandler = () => {
+                    genericModal.style.display = 'none';
+                    genericModalConfirmBtn.removeEventListener('click', submitHandler);
+                    genericModalCancelBtn.removeEventListener('click', cancelHandler);
+                    resolve(genericModalInput.value.trim());
+                };
+                const cancelHandler = () => {
+                    genericModal.style.display = 'none';
+                    genericModalConfirmBtn.removeEventListener('click', submitHandler);
+                    genericModalCancelBtn.removeEventListener('click', cancelHandler);
+                    resolve(null); // Resolve with null if cancelled
+                };
+                genericModalConfirmBtn.addEventListener('click', submitHandler);
+                genericModalCancelBtn.addEventListener('click', cancelHandler);
+            });
+        }
+
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light-mode') {
+            body.classList.add('light-mode');
+            themeToggle.checked = true;
+        } else {
+            body.classList.remove('light-mode');
+            themeToggle.checked = false;
+        }
+
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light-mode');
+                if (particleMaterial) {
+                    particleMaterial.color.set(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--particle-color-chat')));
+                }
+                if (document.getElementById('loginPageBackground').style.display === 'block') {
+                    window.createFallingSquares();
+                }
+            } else {
+                body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark-mode');
+                if (particleMaterial) {
+                    particleMaterial.color.set(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--particle-color-chat')));
+                }
+                if (document.getElementById('loginPageBackground').style.display === 'block') {
+                    window.createFallingSquares();
+                }
+            }
+        });
+
+
+        // Initialize Three.js background for the MAIN CHAT APP
+        function initThreeJsBackground() {
+            if (scene && camera && renderer) {
+                document.getElementById('threeJsCanvas').style.display = 'block';
+                return;
+            }
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            const threeJsCanvas = document.getElementById('threeJsCanvas');
+            if (!threeJsCanvas) {
+                const newCanvas = renderer.domElement;
+                newCanvas.id = 'threeJsCanvas';
+                document.body.insertBefore(newCanvas, document.body.firstChild);
+            } else {
+                if (threeJsCanvas.parentNode && threeJsCanvas.parentNode.nodeType === 1) {
+                    threeJsCanvas.parentNode.replaceChild(renderer.domElement, threeJsCanvas);
+                    renderer.domElement.id = 'threeJsCanvas';
+                } else {
+                    document.body.insertBefore(renderer.domElement, document.body.firstChild);
+                    renderer.domElement.id = 'threeJsCanvas';
+                }
+            }
+
+            particleGeometry = new THREE.BufferGeometry();
+            const vertices = [];
+            for (let i = 0; i < 2000; i++) {
+                const x = (Math.random() - 0.5) * 25;
+                const y = (Math.random() - 0.5) * 25;
+                const z = (Math.random() - 0.5) * 25;
+                vertices.push(x, y, z);
+            }
+            particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+            particleMaterial = new THREE.PointsMaterial({
+                color: new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--particle-color-chat')),
+                size: 0.35,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            particles = new THREE.Points(particleGeometry, particleMaterial);
+            scene.add(particles);
+
+            animateThreeJsBackground();
+
+            window.addEventListener('resize', onWindowResize, false);
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+        }
+
+        // Animation loop for Three.js
+        function animateThreeJsBackground() {
+            requestAnimationFrame(animateThreeJsBackground);
+
+            if (particles) {
+                particles.rotation.x += 0.0007;
+                particles.rotation.y += 0.0015;
+            }
+
+            if (camera) {
+                camera.position.x += ((mouseX / windowHalfX) * 5 - camera.position.x) * 0.05;
+                camera.position.y += ((-mouseY / windowHalfY) * 5 - camera.position.y) * 0.05;
+                camera.lookAt(scene.position);
+            }
+
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        // Handle window resize for Three.js
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            if (renderer && camera) {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            }
+        }
+
+        // Handle mouse move for Three.js
+        function onDocumentMouseMove(event) {
+            mouseX = event.clientX - windowHalfX;
+            mouseY = event.clientY - windowHalfY;
+        }
+
+        // Update Three.js background based on a theme (now calls backend)
+        document.getElementById('changeBackgroundBtn').addEventListener('click', async () => {
+            if (!scene || !camera || !renderer) {
+                window.showAlert("Background Error", "Three.js background not initialized. Please reload the page if issue persists.");
+                return;
+            }
+
+            const theme = await window.showPrompt(
+                "Change Chat Background Theme",
+                "What kind of background theme would you like for the chat app? (e.g., 'space', 'ocean waves', 'cyberpunk city')",
+                "Enter theme (e.g., 'abstract', 'futuristic')"
+            );
+
+            if (!theme) {
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage("Chat background theme change cancelled.", 'bot', botTimestamp, true);
+                return;
+            }
+
+            showTypingIndicator();
+
+            try {
+                const promptForGemini = `Generate 3-5 keywords and a single color hex code (e.g., "#RRGGBB") for a Three.js abstract particle background based on the theme: "${theme}". The response MUST be ONLY a JSON object with "keywords" (array of strings) and "color" (hex string).`;
+
+                // NOTE: Fetching from /api/gemini-structured-query will route to your Vercel serverless function
+                const response = await fetch(`${BACKEND_BASE_URL}/gemini-structured-query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptForGemini, schema: {
+                        type: "OBJECT",
+                        properties: {
+                            "keywords": {
+                                "type": "ARRAY",
+                                "items": { "type": "STRING" }
+                            },
+                            "color": { "type": "STRING" }
+                        },
+                        "propertyOrdering": ["keywords", "color"]
+                    } })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Backend structured query error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                const themeData = data.data;
+
+                if (themeData && themeData.color) {
+                    particleMaterial.color.set(themeData.color);
+
+                    const newVertices = [];
+                    let numParticles = 2000;
+                    let particleSize = 0.35;
+                    let particleSpread = 25;
+
+                    if (themeData.keywords) {
+                        if (themeData.keywords.includes('space') || themeData.keywords.includes('stars') || themeData.keywords.includes('galaxy')) {
+                            numParticles = 6000;
+                            particleSize = 0.4;
+                            particleSpread = 60;
+                        } else if (themeData.keywords.includes('waves') || themeData.keywords.includes('liquid') || themeData.keywords.includes('fluid') || themeData.keywords.includes('ocean')) {
+                            numParticles = 1000;
+                            particleSize = 0.2;
+                            particleSpread = 20;
+                        } else if (themeData.keywords.includes('cyberpunk') || themeData.keywords.includes('neon') || themeData.keywords.includes('city')) {
+                            numParticles = 3000;
+                            particleSize = 0.3;
+                            particleSpread = 40;
+                        } else if (themeData.keywords.includes('calm') || themeData.keywords.includes('minimal')) {
+                            numParticles = 800;
+                            particleSize = 0.25;
+                            particleSpread = 15;
+                        }
+                    }
+
+                    for (let i = 0; i < numParticles; i++) {
+                        const x = (Math.random() - 0.5) * particleSpread;
+                        const y = (Math.random() - 0.5) * particleSpread;
+                        const z = (Math.random() - 0.5) * particleSpread;
+                        newVertices.push(x, y, z);
+                    }
+                    particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(newVertices, 3));
+                    particleGeometry.attributes.position.needsUpdate = true;
+                    particleMaterial.size = particleSize;
+
+                    const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    addMessage(`Chat background updated to a "${theme}" theme.`, 'bot', botTimestamp, true);
+                } else {
+                    const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    addMessage("AI response missing color or keywords for background. Using current theme default.", 'bot', botTimestamp, true);
+                }
+            } catch (error) {
+                console.error("Error updating Three.js chat background via backend:", error);
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage(`Failed to update chat background. There was an error with the AI response: ${error.message}. Please ensure your Vercel backend functions are deployed and accessible.`, 'bot', botTimestamp, true);
+            } finally {
+                hideTypingIndicator();
+            }
+        });
+
+
+        // Function to create and manage falling squares for LOGIN PAGE
+        window.createFallingSquares = function() {
+            const container = document.getElementById('loginPageBackground');
+            if (!container) return;
+
+            container.innerHTML = '';
+            clearInterval(window.squareInterval);
+
+            const numSquares = 80;
+            const minSize = 15;
+            const maxSize = 50;
+            const squareColor = getComputedStyle(document.documentElement).getPropertyValue('--square-color-login');
+
+            for (let i = 0; i < numSquares; i++) {
+                const square = document.createElement('div');
+                square.className = 'square';
+                const size = Math.random() * (maxSize - minSize) + minSize;
+                const left = Math.random() * 100;
+                const delay = Math.random() * 10;
+                const duration = 10 + Math.random() * 10;
+
+                square.style.width = `${size}px`;
+                square.style.height = `${size}px`;
+                square.style.left = `${left}%`;
+                square.style.animationDelay = `${delay}s`;
+                square.style.animationDuration = `${duration}s`;
+                square.style.backgroundColor = squareColor;
+                container.appendChild(square);
+            }
+        }
+
+        // --- Local Authentication Functions ---
+        function getLocalUsers() {
+            return JSON.parse(localStorage.getItem('localUsers')) || [];
+        }
+
+        function saveLocalUsers(users) {
+            localStorage.setItem('localUsers', JSON.stringify(users));
+        }
+
+        // Basic password hashing (for local storage only, not secure)
+        function hashPassword(password) {
+            return btoa(password); // Base64 encoding for simple "obscurement"
+        }
+
+        // Toggle between Login and Register forms
+        window.toggleAuthMode = function() {
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                authPrompt.textContent = "Login to your account";
+                authSubmitBtn.textContent = "Login 🎓";
+                authSubmitBtn.onclick = handleLogin; // Assign function directly
+                switchAuthText.textContent = "Don't have an account?";
+                switchAuthBtn.textContent = "Register";
+
+                registerUserNameGroup.style.display = 'none';
+                registerRollNumberGroup.style.display = 'none';
+            } else {
+                authPrompt.textContent = "Register a new account";
+                authSubmitBtn.textContent = "Register 🚀";
+                authSubmitBtn.onclick = handleRegister; // Assign function directly
+                switchAuthText.textContent = "Already have an account?";
+                switchAuthBtn.textContent = "Login";
+
+                registerUserNameGroup.style.display = 'block';
+                registerRollNumberGroup.style.display = 'block';
+            }
+            // Clear input fields when switching modes
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('registerUserName').value = '';
+            document.getElementById('registerRollNumber').value = '';
+        }
+
+        window.handleLogin = async function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!email || !password) {
+                window.showAlert("Missing Credentials", "Please enter both email and password.");
+                return;
+            }
+
+            const users = getLocalUsers();
+            const foundUser = users.find(user => user.email === email && user.passwordHash === hashPassword(password));
+
+            if (foundUser) {
+                currentUserProfile = { name: foundUser.name, roll: foundUser.roll };
+                localStorage.setItem('currentUserProfile', JSON.stringify(currentUserProfile)); // Store current user profile
+                localStorage.setItem('loggedInUserEmail', email); // Indicate user is logged in
+                window.showAlert("Login Successful", `Welcome back, ${foundUser.name.split(' ')[0]}!`);
+                
+                // Transition to mood/topic modal
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('loginPageBackground').style.display = 'none';
+                clearInterval(window.squareInterval);
+
+                document.getElementById('modalUserName').textContent = currentUserProfile.name.split(' ')[0];
+                document.getElementById('moodTopicModal').style.display = 'flex';
+
+                document.getElementById('chatApp').style.display = 'none';
+                document.getElementById('threeJsCanvas').style.display = 'none';
+
+                document.getElementById('welcomeUserHeader').innerHTML = `
+                    <strong>${currentUserProfile.name}</strong><br>
+                    Roll: ${currentUserProfile.roll}
+                `;
+                document.getElementById('welcomeUserSidebar').innerHTML = `
+                    <strong>${currentUserProfile.name}</strong><br>
+                    Roll: ${currentUserProfile.roll}
+                `;
+                window.renderChatHistory(); // Render chat history for the logged-in user
+            } else {
+                window.showAlert("Login Failed", "Invalid email or password.");
+            }
+        };
+
+        window.handleRegister = async function() {
+            const email = document.getElementById('loginEmail').value.trim(); // Email from login field
+            const password = document.getElementById('loginPassword').value.trim(); // Password from login field
+            const userName = document.getElementById('registerUserName').value.trim();
+            const rollNumber = document.getElementById('registerRollNumber').value.trim();
+
+            if (!email || !password || !userName || !rollNumber) {
+                window.showAlert("Missing Information", "Please fill in all registration fields.");
+                return;
+            }
+
+            if (password.length < 6) {
+                window.showAlert("Password Too Short", "Password must be at least 6 characters long.");
+                return;
+            }
+
+            let users = getLocalUsers();
+            if (users.some(user => user.email === email)) {
+                window.showAlert("Registration Failed", "This email is already registered. Please login or use a different email.");
+                return;
+            }
+
+            const newUser = {
+                email: email,
+                passwordHash: hashPassword(password),
+                name: userName,
+                roll: rollNumber
+            };
+            users.push(newUser);
+            saveLocalUsers(users);
+
+            // Automatically log in the newly registered user
+            currentUserProfile = { name: newUser.name, roll: newUser.roll };
+            localStorage.setItem('currentUserProfile', JSON.stringify(currentUserProfile));
+            localStorage.setItem('loggedInUserEmail', newUser.email);
+
+            window.showAlert("Registration Successful", "Your account has been created and you are now logged in!");
+            
+            // Transition to mood/topic modal
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('loginPageBackground').style.display = 'none';
+            clearInterval(window.squareInterval);
+
+            document.getElementById('modalUserName').textContent = currentUserProfile.name.split(' ')[0];
+            document.getElementById('moodTopicModal').style.display = 'flex';
+
+            document.getElementById('chatApp').style.display = 'none';
+            document.getElementById('threeJsCanvas').style.display = 'none';
+
+            document.getElementById('welcomeUserHeader').innerHTML = `
+                <strong>${currentUserProfile.name}</strong><br>
+                Roll: ${currentUserProfile.roll}
+            `;
+            document.getElementById('welcomeUserSidebar').innerHTML = `
+                <strong>${currentUserProfile.name}</strong><br>
+                Roll: ${currentUserProfile.roll}
+            `;
+            window.renderChatHistory(); // Render chat history for the logged-in user
+        };
+
+        window.logout = async function() {
+            const confirmed = await window.showConfirm(
+                "Logout Confirmation",
+                "Are you sure you want to end your session and clear local user data?"
+            );
+            if (confirmed) {
+                localStorage.removeItem('loggedInUserEmail'); // Clear login state
+                localStorage.removeItem('currentUserProfile'); // Clear profile
+                localStorage.removeItem('chatHistory'); // Clear chat history
+                localStorage.removeItem('audioEnabled'); // Clear audio preference
+
+                currentUserProfile = null; // Reset current user profile
+                chatHistory = []; // Clear in-memory chat history
+                currentChatId = null; // Reset current chat ID
+                audioEnabled = false; // Reset audio state
+
+                // Clear input fields for next login
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('registerUserName').value = '';
+                document.getElementById('registerRollNumber').value = '';
+
+
+                document.getElementById('chatApp').style.display = 'none';
+                document.getElementById('moodTopicModal').style.display = 'none';
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('loginPageBackground').style.display = 'block';
+                window.createFallingSquares(); // Re-start squares animation for login
+
+                document.getElementById('threeJsCanvas').style.display = 'none'; // Ensure canvas is hidden
+
+                window.renderChatHistory(); // Re-render sidebar (will be empty)
+                scrollToBottom();
+            }
+        };
+
+        // Mood/Topic Selection Logic
+        document.querySelectorAll('.mood-option').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.mood-option').forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                selectedMood = button.dataset.mood;
+            });
+        });
+
+        document.querySelectorAll('.topic-option').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.topic-option').forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                selectedTopic = button.dataset.topic;
+            });
+        });
+
+        function startChatFromModal() {
+            if (!selectedMood) {
+                window.showAlert('Mood Not Selected', 'Please select your mood before starting the chat.');
+                return;
+            }
+            if (!selectedTopic) {
+                window.showAlert('Topic Not Selected', 'Please select a topic before starting the chat.');
+                return;
+            }
+
+            document.getElementById('moodTopicModal').style.display = 'none';
+            document.getElementById('chatApp').style.display = 'grid'; // Display the chat app (full screen)
+
+            initThreeJsBackground(); // Initialize Three.js background for chat
+            document.getElementById('threeJsCanvas').style.display = 'block';
+
+            document.getElementById('welcomeUserHeader').innerHTML = `
+                <strong>${currentUserProfile.name}</strong><br>
+                Roll: ${currentUserProfile.roll}
+            `;
+            document.getElementById('welcomeUserSidebar').innerHTML = `
+                <strong>${currentUserProfile.name}</strong><br>
+                Roll: ${currentUserProfile.roll}
+            `;
+
+            if (chatHistory.length === 0) {
+                const newChat = {
+                    id: Date.now().toString(),
+                    title: 'New Chat',
+                    messages: []
+                };
+                chatHistory.unshift(newChat);
+                currentChatId = newChat.id;
+                localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+                window.renderChatHistory();
+                document.getElementById('messages').innerHTML = '';
+            } else {
+                loadChat(chatHistory[0].id);
+            }
+
+            const personalizedWelcome = generatePersonalizedWelcome(selectedMood, selectedTopic);
+            const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            addMessage(personalizedWelcome, 'bot', botTimestamp, true);
+            saveCurrentChatState({ content: personalizedWelcome, sender: 'bot', timestamp: botTimestamp });
+
+            updateSuggestions(selectedTopic);
+            scrollToBottom();
+        }
+
+        function generatePersonalizedWelcome(mood, topic) {
+            const userName = currentUserProfile.name.split(' ')[0];
+            let greeting = `Hello, ${userName}! It's great to see you. `;
+
+            switch(mood) {
+                case 'happy':
+                    greeting += "Glad to hear you're feeling good! Let's make this an even more productive session. ";
+                    break;
+                case 'stressed':
+                    greeting += "I understand you're feeling stressed. Take a deep breath! I'm here to help lighten your academic load. ";
+                    break;
+                case 'confused':
+                    greeting += "Feeling a bit confused? Don't worry, we'll clear things up together. ";
+                    break;
+                case 'motivated':
+                    greeting += "Awesome to hear you're motivated! Let's channel that energy into some productive learning. ";
+                    break;
+                case 'curious':
+                    greeting += "Curiosity is the key to knowledge! What mysteries shall we unravel today? ";
+                    break;
+                default:
+                    greeting += "How can I best support your studies today? ";
+            }
+
+            switch(topic) {
+                case 'math':
+                    greeting += `Looks like you're ready to tackle some Math. What ${topic} concept should we explore?`;
+                    break;
+                case 'science':
+                    greeting += `Ready for a dive into Science? What ${topic} question do you have?`;
+                    break;
+                case 'programming':
+                    greeting += `Excited to code? Let's talk Programming. How can I help with your coding journey?`;
+                    break;
+                case 'history':
+                    greeting += `Exploring History, are we? Which period or event sparks your interest?`;
+                    break;
+                case 'college life':
+                    greeting += `Navigating College Life can be a lot. How can I assist with your campus queries?`;
+                    break;
+                case 'exam prep':
+                    greeting += `It's Exam Prep time! Let's get you ready. What are you studying for?`;
+                    break;
+                default: // General chat
+                    greeting += `What academic area or college life topic would you like to discuss?`;
+                    break;
+            }
+            return greeting;
+        }
+
+        // Chat history management
+        window.renderChatHistory = function() {
+            const chatHistoryContainer = document.getElementById('chatHistory');
+            chatHistoryContainer.innerHTML = '';
+
+            // Only render chat history if user is logged in
+            if (currentUserProfile) {
+                chatHistory.forEach(chat => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
+                    historyItem.dataset.chatId = chat.id;
+                    historyItem.onclick = () => loadChat(chat.id);
+
+                    historyItem.innerHTML = `
+                        <span class="history-item-title">${chat.title}</span>
+                        <div class="history-item-actions">
+                            <button onclick="editChatTitle(event, '${chat.id}')" title="Edit Chat">✏️</button>
+                            <button onclick="deleteChat(event, '${chat.id}')" title="Delete Chat">🗑️</button>
+                        </div>
+                    `;
+                    chatHistoryContainer.appendChild(historyItem);
+                });
+            }
+        }
+
+        async function startNewChat() {
+            const newChat = {
+                id: Date.now().toString(),
+                title: 'New Chat',
+                messages: []
+            };
+            chatHistory.unshift(newChat);
+            currentChatId = newChat.id;
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            window.renderChatHistory();
+            document.getElementById('messages').innerHTML = '';
+
+            const welcomeMsgDiv = document.createElement('div');
+            welcomeMsgDiv.className = 'welcome-message';
+            welcomeMsgDiv.innerHTML = `
+                <h2>🎓 Ready for a new academic adventure!</h2>
+                <p>What can I help you with in this session?</p>
+                <div class="suggestions" id="initialSuggestions">
+                    <button class="suggestion" onclick="sendSuggestion('Give me study tips')">Give me study tips 📚</button>
+                    <button class="suggestion" onclick="sendSuggestion('How to improve grades?')">How to improve grades?📈</button>
+                    <button class="suggestion" onclick="sendSuggestion('Tips for presentations')">Tips for presentations 🎤</button>
+                </div>
+            `;
+            document.getElementById('messages').appendChild(welcomeMsgDiv);
+
+            document.getElementById('messageInput').value = '';
+            document.getElementById('messageInput').style.height = '20px'; // Reset height for new chat
+            adjustTextareaHeight(document.getElementById('messageInput'));
+            scrollToBottom();
+            uploadedDocumentText = '';
+
+            try {
+                // NOTE: Fetching from /api/clear-document-context will route to your Vercel serverless function
+                await fetch(`${BACKEND_BASE_URL}/clear-document-context`, { method: 'POST' });
+                console.log('Backend document context cleared on new chat.');
+            } catch (error) {
+                console.error('Error clearing backend document context on new chat:', error);
+                window.showAlert("Error", "Could not clear previous document context. AI might still reference old documents.");
+            }
+        }
+
+        function loadChat(chatId) {
+            currentChatId = chatId;
+            const chat = chatHistory.find(c => c.id === chatId);
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '';
+
+            const existingWelcome = messagesContainer.querySelector('.welcome-message');
+            if (existingWelcome) {
+                existingWelcome.remove();
+            }
+
+            if (chat) {
+                if (chat.messages.length === 0) {
+                     messagesContainer.innerHTML = `
+                        <div class="welcome-message">
+                            <h2>🎓 Ready for a new academic adventure!</h2>
+                            <p>What can I help you with in this session?</p>
+                            <div class="suggestions" id="initialSuggestions">
+                                <button class="suggestion" onclick="sendSuggestion('Give me study tips')">Give me study tips 📚</button>
+                                <button class="suggestion" onclick="sendSuggestion('How to improve grades?')">How to improve grades?📈</button>
+                                <button class="suggestion" onclick="sendSuggestion('Tips for presentations')">Tips for presentations 🎤</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    chat.messages.forEach(msg => addMessage(msg.content, msg.sender, msg.timestamp, false));
+                }
+            }
+            window.renderChatHistory();
+            scrollToBottom();
+            uploadedDocumentText = ''; // Clear frontend record, backend context also cleared
+
+            try {
+                // NOTE: Fetching from /api/clear-document-context will route to your Vercel serverless function
+                fetch(`${BACKEND_BASE_URL}/clear-document-context`, { method: 'POST' });
+                console.log('Backend document context cleared on loading new chat.');
+            } catch (error) {
+                console.error('Error clearing backend document context on loading new chat:', error);
+            }
+        }
+
+        async function editChatTitle(event, chatId) {
+            event.stopPropagation();
+            const chat = chatHistory.find(c => c.id === chatId);
+            if (chat) {
+                const newTitle = await window.showPrompt('Edit Chat Title', 'Enter new title for this chat:', chat.title);
+                if (newTitle && newTitle.trim() !== '') {
+                    chat.title = newTitle.trim();
+                    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+                    window.renderChatHistory();
+                } else if (newTitle !== null) {
+                    window.showAlert('Title Empty', 'Chat title cannot be empty.');
+                }
+            }
+        }
+
+        async function deleteChat(event, chatId) {
+            event.stopPropagation();
+            const confirmed = await window.showConfirm('Delete Chat', 'Are you sure you want to delete this chat?');
+            if (confirmed) {
+                chatHistory = chatHistory.filter(c => c.id !== chatId);
+                localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+                window.renderChatHistory();
+                if (currentChatId === chatId) {
+                    if (chatHistory.length > 0) {
+                        loadChat(chatHistory[0].id);
+                    } else {
+                        startNewChat();
+                    }
+                }
+            }
+        }
+
+        function adjustTextareaHeight(textarea) {
+            textarea.style.height = '20px';
+            textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendSuggestion(text) {
+            document.getElementById('messageInput').value = text;
+            sendMessage();
+            const welcomeMsg = document.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+        }
+
+        // --- FILE UPLOAD LOGIC ---
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const welcomeMsg = document.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+
+            const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            addMessage(`Uploaded: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`, 'user', timestamp, true);
+
+            showTypingIndicator();
+            const attachButton = document.getElementById('attachButton');
+            const sendButton = document.getElementById('sendButton');
+            attachButton.disabled = true;
+            sendButton.disabled = true;
+
+
+            const formData = new FormData();
+            formData.append('document', file);
+
+            try {
+                // NOTE: Fetching from /api/upload will route to your Vercel serverless function
+                const response = await fetch(`${BACKEND_BASE_URL}/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Backend file upload error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                const botResponseText = data.message + " What specific questions do you have about its content?";
+
+                uploadedDocumentText = 'FILE_UPLOADED_SUCCESSFULLY'; // Mark for current session, backend will have the content
+
+                hideTypingIndicator();
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage(botResponseText, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: botResponseText, sender: 'bot', timestamp: botTimestamp });
+
+            } catch (error) {
+                console.error("Error handling file upload with backend:", error);
+                hideTypingIndicator();
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage(`Oops! There was an error uploading and processing "${file.name}". Error: ${error.message}. Please ensure your Vercel backend functions are deployed and accessible.`, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: `Error: ${error.message}`, sender: 'bot', timestamp: botTimestamp });
+            } finally {
+                event.target.value = '';
+                attachButton.disabled = false;
+                sendButton.disabled = false;
+            }
+        }
+
+        // --- sendMessage ---
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const userMessage = input.value.trim();
+
+            if (!userMessage) return;
+
+            const welcomeMsg = document.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+
+            const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            addMessage(userMessage, 'user', timestamp, true);
+            
+            const currentChat = chatHistory.find(c => c.id === currentChatId);
+            const messagesForAI = currentChat ? currentChat.messages : [];
+
+            // Add the current user message to the temporary history sent to AI
+            const temporaryMessagesForAI = [...messagesForAI, { content: userMessage, sender: 'user', timestamp: timestamp }];
+
+            input.value = '';
+            input.style.height = '20px';
+            adjustTextareaHeight(input);
+
+            showTypingIndicator();
+            const sendButton = document.getElementById('sendButton');
+            const attachButton = document.getElementById('attachButton');
+            sendButton.disabled = true;
+            attachButton.disabled = true;
+
+            try {
+                // NOTE: Fetching from /api/chat will route to your Vercel serverless function
+                const response = await fetch(`${BACKEND_BASE_URL}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userMessage, chatHistory: temporaryMessagesForAI }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Backend error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                const botResponse = data.response;
+
+                hideTypingIndicator();
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage(botResponse, 'bot', botTimestamp, true);
+                // Save both user and bot messages to local storage
+                saveCurrentChatState({ content: userMessage, sender: 'user', timestamp: timestamp });
+                saveCurrentChatState({ content: botResponse, sender: 'bot', timestamp: botTimestamp });
+
+                if (audioEnabled) {
+                    speakText(botResponse);
+                }
+
+            } catch (error) {
+                hideTypingIndicator();
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage(`Error: ${error.message}. Please ensure your Vercel backend functions are deployed and accessible.`, 'bot', botTimestamp, true);
+                // Save the user message even if bot fails, for debugging/record keeping
+                saveCurrentChatState({ content: userMessage, sender: 'user', timestamp: timestamp });
+                saveCurrentChatState({ content: `Error: ${error.message}`, sender: 'bot', timestamp: botTimestamp });
+            } finally {
+                sendButton.disabled = false;
+                attachButton.disabled = false;
+            }
+        }
+
+        // Summarize Chat History
+        document.getElementById('summarizeChatBtn').addEventListener('click', async () => {
+            if (chatHistory.length === 0 || !chatHistory.find(c => c.id === currentChatId)) {
+                window.showAlert("No Chat History", "There's no active conversation to summarize yet. Start chatting!");
+                return;
+            }
+            const currentChat = chatHistory.find(c => c.id === currentChatId);
+            if (currentChat.messages.length === 0) {
+                window.showAlert("Empty Chat", "This chat has no messages to summarize.");
+                return;
+            }
+
+            const conversationText = currentChat.messages.map(entry => `${entry.sender === 'user' ? 'User' : 'Bot'}: ${entry.content}`).join('\n\n');
+            const prompt = `Please provide a concise summary of the following conversation:\n\n${conversationText}`;
+
+            showTypingIndicator();
+            const summarizeBtn = document.getElementById('summarizeChatBtn');
+            summarizeBtn.disabled = true;
+
+            try {
+                // NOTE: Fetching from /api/chat will route to your Vercel serverless function
+                const response = await fetch(`${BACKEND_BASE_URL}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: prompt, chatHistory: [] }), // No need to send full history for summary prompt
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Backend error during summarization: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                const summary = data.response;
+
+                hideTypingIndicator();
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage(`Here's a summary of our current chat:\n\n${summary}`, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: `Here's a summary of our current chat:\n\n${summary}`, sender: 'bot', timestamp: botTimestamp });
+            } catch (error) {
+                hideTypingIndicator();
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage(`Sorry, I couldn't summarize the chat at the moment. Error: ${error.message}`, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: `Sorry, I couldn't summarize the chat at the moment. Error: ${error.message}`, sender: 'bot', timestamp: botTimestamp });
+            } finally {
+                summarizeBtn.disabled = false;
+            }
+        });
+
+        // Creative Prompt
+        document.getElementById('creativePromptBtn').addEventListener('click', async () => {
+            const creativePrompt = await window.showPrompt(
+                "Creative Prompt",
+                "Tell me what you'd like Campus Connect AI to create! (e.g., 'a short poem about success', 'a simple Python function', 'a motivational quote')",
+                "Enter your creative idea..."
+            );
+
+            if (!creativePrompt) {
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage("No creative prompt was provided.", 'bot', botTimestamp, true);
+                return;
+            }
+
+            showTypingIndicator();
+            const creativeBtn = document.getElementById('creativePromptBtn');
+            creativeBtn.disabled = true;
+
+            try {
+                // NOTE: Fetching from /api/chat will route to your Vercel serverless function
+                const response = await fetch(`${BACKEND_BASE_URL}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: `Generate creative text based on the following idea: ${creativePrompt}`, chatHistory: [] }), // No need to send full history for creative prompt
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Backend error during creative prompt: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                const generatedText = data.response;
+
+                hideTypingIndicator();
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage(`Here's what I came up with:\n\n${generatedText}`, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: `Here's what I came up with:\n\n${generatedText}`, sender: 'bot', timestamp: botTimestamp });
+            } catch (error) {
+                hideTypingIndicator();
+                const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                addMessage(`Sorry, I couldn't generate creative text at the moment. Error: ${error.message}`, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: `Sorry, I couldn't generate creative text at the moment. Error: ${error.message}`, sender: 'bot', timestamp: botTimestamp });
+            } finally {
+                creativeBtn.disabled = false;
+            }
+        });
+
+
+        function saveCurrentChatState(message = null) {
+            const currentChat = chatHistory.find(chat => chat.id === currentChatId);
+            if (currentChat) {
+                if (message) {
+                    currentChat.messages.push(message);
+                }
+                if (currentChat.title === 'New Chat' && currentChat.messages.length > 0) {
+                    const firstUserMsg = currentChat.messages.find(msg => msg.sender === 'user');
+                    if (firstUserMsg) {
+                        currentChat.title = firstUserMsg.content.length > 25 ? firstUserMsg.content.substring(0, 25) + '...' : firstUserMsg.content;
+                    }
+                }
+            }
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            window.renderChatHistory();
+        }
+
+
+        function addMessage(content, sender, timestamp, animate = true) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            if (!animate) {
+                messageDiv.style.animation = 'none';
+            }
+
+            // Use currentUserProfile.name for user avatar if available
+            const avatarContent = sender === 'user' && currentUserProfile && currentUserProfile.name ? currentUserProfile.name.charAt(0).toUpperCase() : '🤖';
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatarContent}</div>
+                <div class="message-content">
+                    ${content}
+                    <div class="timestamp">${timestamp}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('messages');
+            let typingIndicator = document.getElementById('typing-indicator');
+            if (!typingIndicator) {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'typing-indicator';
+                typingDiv.id = 'typing-indicator';
+
+                typingDiv.innerHTML = `
+                    <div class="typing-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                `;
+                messagesContainer.appendChild(typingDiv);
+                scrollToBottom();
+            }
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // Web Speech API for voice input
+        let recognition = null;
+        let isListening = false;
+        const voiceBtn = document.getElementById('voiceBtn');
+        const audioToggleBtn = document.getElementById('audioToggleBtn');
+
+
+        function initSpeechRecognition() {
+            if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+                voiceBtn.style.display = 'none';
+                console.warn("Speech Recognition not supported in this browser.");
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = "en-US";
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                isListening = true;
+                voiceBtn.style.color = '#FFD700';
+                voiceBtn.style.boxShadow = '0 0 10px var(--shadow-color-light)';
+                console.log("Speech recognition started. Listening...");
+            };
+            recognition.onend = () => {
+                isListening = false;
+                voiceBtn.style.color = '';
+                voiceBtn.style.boxShadow = '';
+                console.log("Speech recognition ended.");
+            };
+            recognition.onerror = (event) => {
+                isListening = false;
+                voiceBtn.style.color = '';
+                voiceBtn.style.boxShadow = '';
+                console.error("Speech Recognition Error:", event.error);
+
+                let errorMessage = "An unknown error occurred during speech recognition.";
+                if (event.error === 'not-allowed') {
+                    errorMessage = "Microphone access was denied. Please enable microphone permissions for this site in your browser settings.";
+                } else if (event.error === 'no-speech') {
+                    errorMessage = "No speech was detected. Please ensure your microphone is on and working, and speak clearly.";
+                } else if (event.error === 'audio-capture') {
+                    errorMessage = "Audio capture failed. Ensure your microphone is connected and not in use by another application.";
+                } else if (event.error === 'network') {
+                    errorMessage = "Network error. Please check your internet connection.";
+                } else if (event.error === 'aborted') {
+                    errorMessage = "Speech recognition was stopped.";
+                }
+                window.showAlert("Speech Recognition Error", errorMessage);
+            };
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('messageInput').value = transcript;
+                adjustTextareaHeight(document.getElementById('messageInput'));
+                console.log("Speech recognized:", transcript);
+            };
+        }
+
+        voiceBtn.addEventListener("click", () => {
+            if (!recognition) {
+                window.showAlert("Speech Recognition Not Ready", "Speech recognition is not initialized or supported by your browser.");
+                return;
+            }
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+
+        // Text to Speech
+        function speakText(text) {
+            if (!window.speechSynthesis) {
+                console.warn("Text-to-speech not supported in this browser.");
+                return;
+            }
+            if (!audioEnabled) {
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "en-US";
+
+            utterance.onerror = (event) => {
+                console.error('Speech synthesis error:', event);
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Initialize Audio Toggle button state and add event listener
+        function updateAudioToggleBtn() {
+            if (audioEnabled) {
+                audioToggleBtn.classList.add('active');
+                audioToggleBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                        <path d="M11 5L6 9H2v6h4l5 4zM19.07 4.93A10 10 0 0 1 20 12c0 2.21-.9 4.21-2.34 5.66M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                `;
+                audioToggleBtn.title = "Audio Output ON";
+            } else {
+                audioToggleBtn.classList.remove('active');
+                audioToggleBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 5L6 9H2v6h4l5 4zM22 10l-4.41 4.41M17.65 19.35L22 15"></path>
+                    </svg>
+                `;
+                audioToggleBtn.title = "Audio Output OFF";
+            }
+        }
+
+        audioToggleBtn.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            localStorage.setItem('audioEnabled', audioEnabled);
+            updateAudioToggleBtn();
+
+            if (audioEnabled) {
+                const testMessage = "Audio output enabled. I can now speak to you.";
+                speakText(testMessage);
+                console.log(testMessage);
+            } else {
+                window.speechSynthesis.cancel();
+                console.log("Audio output disabled.");
+            }
+        });
+
+        // Dynamic Suggestions based on selected topic
+        function updateSuggestions(topic) {
+            const suggestionsContainer = document.getElementById('initialSuggestions');
+            if (!suggestionsContainer) return;
+
+            let newSuggestions = [];
+            switch (topic) {
+                case 'math':
+                    newSuggestions = [
+                        'Explain calculus basics',
+                        'What is algebraic geometry?',
+                        'Solve quadratic equation: $x^2 - 5x + 6 = 0$',
+                        'Tips for understanding complex numbers'
+                    ];
+                    break;
+                case 'science':
+                    newSuggestions = [
+                        'Explain quantum entanglement',
+                        'What are the laws of thermodynamics?',
+                        'Tell me about photosynthesis',
+                        'Latest breakthroughs in AI'
+                    ];
+                    break;
+                case 'programming':
+                    newSuggestions = [
+                        'Explain object-oriented programming',
+                        'Write a simple Python function for factorial',
+                        'What is the difference between JavaScript and Java?',
+                        'Tips for debugging code'
+                    ];
+                    break;
+                case 'history':
+                    newSuggestions = [
+                        'Summarize World War II',
+                        'Who was Cleopatra?',
+                        'Explain the Industrial Revolution',
+                        'Key events of the Cold War'
+                    ];
+                    break;
+                case 'college life':
+                    newSuggestions = [
+                        'Tips for managing college stress',
+                        'How to make friends in college?',
+                        'Advice on choosing a major',
+                        'Balancing studies and social life'
+                    ];
+                    break;
+                case 'exam prep':
+                    newSuggestions = [
+                        'Effective study methods for exams',
+                        'How to overcome exam anxiety?',
+                        'Create a study schedule',
+                        'Strategies for multiple-choice questions'
+                    ];
+                    break;
+                case 'general':
+                default:
+                    newSuggestions = [
+                        'Give me study tips',
+                        'How to improve grades?',
+                        'Tips for presentations',
+                        'Tell me something interesting'
+                    ];
+                    break;
+            }
+
+            suggestionsContainer.innerHTML = '';
+            newSuggestions.forEach(suggestionText => {
+                const button = document.createElement('button');
+                button.className = 'suggestion';
+                button.textContent = suggestionText;
+                button.onclick = () => sendSuggestion(suggestionText);
+                suggestionsContainer.appendChild(button);
+            });
+        }
+
+        // Initial load logic
+        window.addEventListener('load', () => {
+            // Check if a user is already logged in locally
+            const loggedInEmail = localStorage.getItem('loggedInUserEmail');
+            if (loggedInEmail) {
+                const users = getLocalUsers();
+                const foundUser = users.find(user => user.email === loggedInEmail);
+                if (foundUser) {
+                    currentUserProfile = { name: foundUser.name, roll: foundUser.roll };
+                    // If user is already logged in, skip login page and go straight to mood/topic or chat
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('loginPageBackground').style.display = 'none';
+                    clearInterval(window.squareInterval);
+
+                    document.getElementById('modalUserName').textContent = currentUserProfile.name.split(' ')[0];
+                    document.getElementById('moodTopicModal').style.display = 'flex';
+
+                    document.getElementById('chatApp').style.display = 'none'; // Will be shown after mood selection
+                    document.getElementById('threeJsCanvas').style.display = 'none'; // Will be shown after mood selection
+
+                    document.getElementById('welcomeUserHeader').innerHTML = `
+                        <strong>${currentUserProfile.name}</strong><br>
+                        Roll: ${currentUserProfile.roll}
+                    `;
+                    document.getElementById('welcomeUserSidebar').innerHTML = `
+                        <strong>${currentUserProfile.name}</strong><br>
+                        Roll: ${currentUserProfile.roll}
+                    `;
+
+                } else {
+                    // Logged in email found, but user data not found (corrupted local storage)
+                    window.showAlert("Session Expired", "Your login session is invalid. Please log in again.");
+                    localStorage.removeItem('loggedInUserEmail');
+                    localStorage.removeItem('currentUserProfile');
+                    document.getElementById('loginPage').style.display = 'flex';
+                    document.getElementById('loginPageBackground').style.display = 'block';
+                    window.createFallingSquares();
+                    document.getElementById('moodTopicModal').style.display = 'none';
+                    document.getElementById('chatApp').style.display = 'none';
+                    document.getElementById('threeJsCanvas').style.display = 'none';
+                }
+            } else {
+                // No user logged in, show login page
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('loginPageBackground').style.display = 'block';
+                window.createFallingSquares();
+                document.getElementById('moodTopicModal').style.display = 'none';
+                document.getElementById('chatApp').style.display = 'none';
+                document.getElementById('threeJsCanvas').style.display = 'none';
+            }
+
+            window.renderChatHistory(); // Always render history (will be empty if not logged in)
+            initSpeechRecognition();
+            updateAudioToggleBtn();
+
+            // Ensure login form is the default view on load
+            toggleAuthMode(); // Sets to register
+            toggleAuthMode(); // Sets back to login
+        });
+    </script>
+</body>
+</html>

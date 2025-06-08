@@ -6,6 +6,10 @@
     const { RecursiveCharacterTextSplitter } = require('langchain/text_splitter');
     const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+    // --- CRITICAL PDFLoader Configuration for Vercel ---//
+    // Ensure pdf.js can find its worker files. This path is relative to the *serverless function's root*.
+    process.env.LANGCHAIN_PDFJS_PATH = process.env.LANGCHAIN_PDFJS_PATH || '/node_modules/pdfjs-dist';
+
     // --- IMPORTANT: Environment variable for API Key ---
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -116,8 +120,10 @@
         }
 
         try {
-            const blob = new Blob([fileBuffer], { type: mimeType });
-            const loader = new PDFLoader(blob);
+            // PDFLoader needs to be able to find the pdf.worker.js file.
+            // By default, it expects it in node_modules/pdfjs-dist.
+            // We set LANGCHAIN_PDFJS_PATH to ensure it points there relative to the function's root.
+            const loader = new PDFLoader(fileBuffer); // Pass buffer directly to PDFLoader
             const docs = await loader.load();
 
             if (docs.length === 0) {

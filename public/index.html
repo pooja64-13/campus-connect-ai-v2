@@ -6,7 +6,59 @@
     <title>Campus Connect AI - Your Academic Companion</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- NEW: Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+            /* ... existing CSS ... */
+
+            /* Add some basic styling for markdown elements if not already present */
+            .message-content h1, .message-content h2, .message-content h3 {
+                color: var(--text-accent);
+                margin-top: 1em;
+                margin-bottom: 0.5em;
+            }
+            .message-content p {
+                margin-bottom: 0.5em;
+            }
+            .message-content strong {
+                color: var(--text-primary);
+                font-weight: 700;
+            }
+            .message-content em {
+                font-style: italic;
+            }
+            .message-content ul, .message-content ol {
+                margin-left: 1.5em;
+                margin-bottom: 0.5em;
+            }
+            .message-content li {
+                margin-bottom: 0.25em;
+            }
+            .message-content pre {
+                background: rgba(0, 0, 0, 0.3); /* Darker background for code blocks */
+                border-radius: 8px;
+                padding: 10px;
+                overflow-x: auto;
+                font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+                font-size: 0.9em;
+                margin-top: 0.5em;
+                margin-bottom: 0.5em;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            .message-content code {
+                font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+                background: rgba(0, 0, 0, 0.2);
+                padding: 0.2em 0.4em;
+                border-radius: 4px;
+            }
+            body.light-mode .message-content pre {
+                background: rgba(0, 0, 0, 0.08); /* Lighter background for code blocks in light mode */
+                border: 1px solid rgba(0, 0, 0, 0.05);
+            }
+            body.light-mode .message-content code {
+                background: rgba(0, 0, 0, 0.05);
+            }
+
         /* CSS Variables for Theme */
         :root {
             /* Dark Mode (Default) */
@@ -2803,6 +2855,37 @@
             toggleAuthMode(); // Sets to register
             toggleAuthMode(); // Sets back to login
         });
+        // ... existing JS variables and functions ...
+
+            function addMessage(content, sender, timestamp, animate = true) {
+                const messagesContainer = document.getElementById('messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                if (!animate) {
+                    messageDiv.style.animation = 'none';
+                }
+
+                const avatarContent = sender === 'user' && currentUserProfile && currentUserProfile.name ? currentUserProfile.name.charAt(0).toUpperCase() : '🤖';
+
+                let formattedContent = content;
+                if (sender === 'bot') {
+                    // NEW: Use marked.js to convert Markdown to HTML for bot messages
+                    formattedContent = marked.parse(content);
+                }
+
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">${avatarContent}</div>
+                    <div class="message-content">
+                        ${formattedContent}
+                        <div class="timestamp">${timestamp}</div>
+                    </div>
+                `;
+
+                messagesContainer.appendChild(messageDiv);
+                scrollToBottom();
+            };
+
+            // ... rest of existing JS functions ...
     </script>
 </body>
 </html>

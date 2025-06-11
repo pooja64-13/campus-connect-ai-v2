@@ -51,8 +51,6 @@
         }
 
         const encodedQuery = encodeURIComponent(query);
-        // Using `q` for general search or top-headlines can be tricky without user intent
-        // NewsAPI's /everything endpoint is better for general queries based on keywords.
         const url = `https://newsapi.org/v2/everything?q=${encodedQuery}&sortBy=relevancy&language=en&pageSize=${limit}&apiKey=${NEWS_API_KEY}`;
 
         try {
@@ -68,7 +66,6 @@
             if (data.articles && data.articles.length > 0) {
                 let newsSummary = "Here are some recent news headlines:\n";
                 data.articles.forEach((article, index) => {
-                    // Include source name to make it more natural
                     newsSummary += `${index + 1}. **${article.title}** (Source: ${article.source.name || 'Unknown'})`;
                     if (article.description) {
                         newsSummary += `: ${article.description}`;
@@ -131,14 +128,17 @@
                 month: 'long',
                 day: 'numeric'
             });
+            // NEW: Use a more explicit time format for AI, including timezone (optional, but good for context)
             const currentTime = now.toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit',
-                hour12: false
+                hour12: false, // 24-hour format
+                timeZoneName: 'short' // E.g., IST, PDT
             });
 
-            let context = `Current date: ${currentDate}. Current time: ${currentTime}. `;
+            // NEW: More explicit context message
+            let context = `The current date is ${currentDate}. The current time is ${currentTime}. `;
 
             const newsKeywords = ['news', 'current events', 'latest headlines', 'what\'s happening', 'breaking news', 'today\'s news'];
             const isNewsQuery = newsKeywords.some(keyword => userMessage.toLowerCase().includes(keyword));
@@ -148,9 +148,10 @@
                 context += `Here is some recent news context: ${newsContent}\n\n`;
             }
 
-            // NEW: System instruction for natural language and avoiding boilerplate
-            const systemInstruction = `You are Campus Connect AI, a helpful and friendly academic assistant. 
+            // NEW: Enhanced system instruction emphasizing context usage for current time/date
+            const systemInstruction = `You are Campus Connect AI, a helpful and friendly academic assistant.
             Your goal is to provide concise, relevant, and accurate answers in a natural, conversational tone.
+            **Always use the provided "Current date" and "Current time" in your responses when asked about the date or time.**
             Avoid overly formal or API-like responses. Focus on being approachable and clear.
             Do not mention your knowledge cutoff. If asked for current information, use the provided context.
             If the context is insufficient, state that you cannot provide real-time updates.

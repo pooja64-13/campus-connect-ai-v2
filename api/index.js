@@ -128,19 +128,17 @@
                 month: 'long',
                 day: 'numeric'
             });
-            // NEW: Use a more explicit time format for AI, including timezone (optional, but good for context)
+            // NEW: Simplify time format for better AI parsing, remove timezone if it complicates.
             const currentTime = now.toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
-                second: '2-digit',
-                hour12: false, // 24-hour format
-                timeZoneName: 'short' // E.g., IST, PDT
+                hour12: true // Use AM/PM format
             });
 
-            // NEW: More explicit context message
-            let context = `The current date is ${currentDate}. The current time is ${currentTime}. `;
+            // NEW: More explicit context and stronger instruction to use it
+            let context = `IMPORTANT CONTEXT: The current date is ${currentDate}. The current time is ${currentTime}. `;
 
-            const newsKeywords = ['news', 'current events', 'latest headlines', 'what\'s happening', 'breaking news', 'today\'s news'];
+            const newsKeywords = ['news', 'current events', 'latest headlines', 'what\'s happening', 'breaking news', 'today\'s news', 'latest news'];
             const isNewsQuery = newsKeywords.some(keyword => userMessage.toLowerCase().includes(keyword));
 
             if (isNewsQuery) {
@@ -148,10 +146,11 @@
                 context += `Here is some recent news context: ${newsContent}\n\n`;
             }
 
-            // NEW: Enhanced system instruction emphasizing context usage for current time/date
+            // NEW: Enhanced system instruction with direct directive for time/date
             const systemInstruction = `You are Campus Connect AI, a helpful and friendly academic assistant.
             Your goal is to provide concise, relevant, and accurate answers in a natural, conversational tone.
-            **Always use the provided "Current date" and "Current time" in your responses when asked about the date or time.**
+            **When asked about the current date or time, you MUST use the "IMPORTANT CONTEXT" provided at the beginning of the user's query.**
+            Do not use any other date or time knowledge.
             Avoid overly formal or API-like responses. Focus on being approachable and clear.
             Do not mention your knowledge cutoff. If asked for current information, use the provided context.
             If the context is insufficient, state that you cannot provide real-time updates.

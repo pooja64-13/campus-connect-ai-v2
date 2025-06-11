@@ -62,127 +62,128 @@
         /* CSS Variables for Theme */
         :root {
             /* Dark Mode (Default) */
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a2e;
-            --bg-tertiary: #16213e; /* Gradient end */
-            --bg-app-overlay: rgba(30, 30, 30, 0.6); /* Increased transparency for animations */
-            --bg-sidebar: rgba(15, 15, 15, 0.7); /* Increased transparency */
-            --bg-header: rgba(25, 25, 25, 0.7); /* Increased transparency */
-            --bg-message-user: rgba(255, 193, 7, 0.1); /* Golden tint, more transparent */
-            --bg-message-bot: rgba(35, 35, 35, 0.5); /* More transparent */
-            --bg-input: rgba(40, 40, 40, 0.6); /* More transparent */
-            --bg-history-item: rgba(30, 30, 30, 0.6); /* More transparent */
-            --bg-typing-indicator: rgba(35, 35, 35, 0.5); /* More transparent */
-            --bg-suggestion: rgba(255, 193, 7, 0.08); /* Golden tint, more transparent */
-            --bg-login-box: rgba(25, 25, 25, 0.6); /* More transparent */
+                --bg-primary: #0a0a0a;
+                --bg-secondary: #1a1a2e;
+                --bg-tertiary: #16213e; /* Gradient end */
+                --bg-app-overlay: rgba(30, 30, 30, 0.6); /* Increased transparency for animations */
+                --bg-sidebar: rgba(15, 15, 15, 0.7); /* Increased transparency */
+                --bg-header: rgba(25, 25, 25, 0.7); /* Increased transparency */
+                --bg-message-user: rgba(255, 193, 7, 0.1); /* Golden tint, more transparent */
+                --bg-message-bot: rgba(35, 35, 35, 0.5); /* More transparent */
+                --bg-input: rgba(40, 40, 40, 0.6); /* More transparent */
+                --bg-history-item: rgba(30, 30, 30, 0.6); /* More transparent */
+                --bg-typing-indicator: rgba(35, 35, 35, 0.5); /* More transparent */
+                --bg-suggestion: rgba(255, 193, 7, 0.08); /* Golden tint, more transparent */
+                --bg-login-box: rgba(25, 25, 25, 0.6); /* More transparent */
 
-            --text-primary: rgba(255, 255, 255, 0.9);
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-tertiary: rgba(255, 255, 255, 0.4);
-            --text-accent: #FFD700; /* Golden color */
-            --text-button-dark: #0a0a0a;
+                --text-primary: rgba(255, 255, 255, 0.9);
+                --text-secondary: rgba(255, 255, 255, 0.7);
+                --text-tertiary: rgba(255, 255, 255, 0.4);
+                --text-accent: #FFD700; /* Golden color */
+                --text-button-dark: #0a0a0a;
 
-            --border-color: rgba(255, 215, 0, 0.15); /* More subtle golden border */
-            --shadow-color-light: rgba(255, 215, 0, 0.25); /* More subtle golden shadow */
-            --shadow-color-dark: rgba(0, 0, 0, 0.5); /* More subtle shadow */
+                --border-color: rgba(255, 215, 0, 0.15); /* More subtle golden border */
+                --shadow-color-light: rgba(255, 215, 0, 0.25); /* More subtle golden shadow */
+                --shadow-color-dark: rgba(0, 0, 0, 0.5); /* More subtle shadow */
 
-            /* Three.js Particle color (for Chat App) */
-            --particle-color-chat: #FFD700; /* Golden particles for chat app background */
+                /* Three.js Particle color (for Chat App) */
+                --particle-color-chat: #FFD700; /* Golden particles for chat app background */
 
-            /* Falling Squares color (for Login page) */
-            --square-color-login: #FFD700; /* Golden yellow for login squares */
+                /* Falling Squares color (for Login page) */
+                --square-color-login: #FFD700; /* Golden yellow for login squares in dark mode */
 
-            --accent-btn-bg: linear-gradient(135deg, #FFD700, #FFA000); /* Golden gradient */
+                --accent-btn-bg: linear-gradient(135deg, #FFD700, #FFA000); /* Golden gradient */
 
-            --status-online: #4ade80; /* Green */
-        }
+                --status-online: #4ade80; /* Green */
+            }
 
-        /* Light Mode */
-        body.light-mode {
-            --bg-primary: #f0f2f5;
-            --bg-secondary: #e0e2e5;
-            --bg-tertiary: #d0d2d5;
-            --bg-app-overlay: rgba(255, 255, 255, 0.7); /* Increased transparency for animations */
-            --bg-sidebar: rgba(240, 240, 240, 0.7); /* Increased transparency */
-            --bg-header: rgba(230, 230, 230, 0.7); /* Increased transparency */
-            --bg-message-user: rgba(173, 216, 230, 0.25); /* Light blue tint, more transparent */
-            --bg-message-bot: rgba(240, 240, 240, 0.6); /* More transparent */
-            --bg-input: rgba(230, 230, 230, 0.7); /* More transparent */
-            --bg-history-item: rgba(220, 220, 220, 0.6); /* More transparent */
-            --bg-typing-indicator: rgba(230, 230, 230, 0.6); /* More transparent */
-            --bg-suggestion: rgba(173, 216, 230, 0.2); /* Light blue tint, more transparent */
-            --bg-login-box: rgba(240, 240, 240, 0.7); /* More transparent */
+            /* Light Mode */
+            body.light-mode {
+                --bg-primary: #f0f2f5;
+                --bg-secondary: #e0e2e5;
+                --bg-tertiary: #d0d2d5;
+                --bg-app-overlay: rgba(255, 255, 255, 0.7);
+                --bg-sidebar: rgba(240, 240, 240, 0.7);
+                --bg-header: rgba(230, 230, 230, 0.7);
+                --bg-message-user: rgba(173, 216, 230, 0.25);
+                --bg-message-bot: rgba(240, 240, 240, 0.6);
+                --bg-input: rgba(230, 230, 230, 0.7);
+                --bg-history-item: rgba(220, 220, 220, 0.6);
+                --bg-typing-indicator: rgba(230, 230, 230, 0.6);
+                --bg-suggestion: rgba(173, 216, 230, 0.2);
+                --bg-login-box: rgba(240, 240, 240, 0.7);
 
-            --text-primary: #333;
-            --text-secondary: #555;
-            --text-tertiary: #888;
-            --text-accent: #4682b4; /* Steel blue */
-            --text-button-dark: #f0f2f5;
+                --text-primary: #333;
+                --text-secondary: #555;
+                --text-tertiary: #888;
+                --text-accent: #4682b4; /* Steel blue */
+                --text-button-dark: #f0f2f5;
 
-            --border-color: rgba(70, 130, 180, 0.2); /* More subtle */
-            --shadow-color-light: rgba(70, 130, 180, 0.2); /* More subtle */
-            --shadow-color-dark: rgba(0, 0, 0, 0.12); /* More subtle */
+                --border-color: rgba(70, 130, 180, 0.2);
+                --shadow-color-light: rgba(70, 130, 180, 0.2);
+                --shadow-color-dark: rgba(0, 0, 0, 0.12);
 
-            /* Light mode specific for Three.js (Chat App) */
-            --particle-color-chat: #4682b4; /* Steel blue for chat app Three.js background */
+                /* Light mode specific for Three.js (Chat App) */
+                --particle-color-chat: #4682b4; /* Steel blue for chat app Three.js background */
 
-            /* Light mode specific for Falling Squares (Login page) */
-            --square-color-login: #c0c0c0; /* Silver/light gray for login squares in light mode */
-            --accent-btn-bg: linear-gradient(135deg, #4682b4, #5f9ea0); /* Steel blue gradient */
-        }
+                /* Light mode specific for Falling Squares (Login page) */
+                --square-color-login: #a0a0a0; /* NEW: Darker grey for light mode login squares */
+                --accent-btn-bg: linear-gradient(135deg, #4682b4, #5f9ea0); /* Steel blue gradient */
+            }
 
-        /* Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+            /* Base Styles */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        html, body {
-            height: 100%; /* Ensure html and body take full viewport height */
-            overflow: hidden; /* Prevent scroll on body */
-        }
+            html, body {
+                height: 100%;
+                overflow: hidden;
+            }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-primary); /* Base background for body */
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background-color 0.5s ease; /* Smooth transition for theme change */
-        }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--bg-primary);
+                position: relative;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition: background-color 0.5s ease;
+            }
 
-        /* Three.js Canvas - NOW FOR MAIN CHAT APP */
-        #threeJsCanvas {
-            position: fixed; /* Fixed position to cover entire viewport */
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1; /* Behind all content */
-            display: none; /* Controlled by JS to show only on chat app */
-        }
+            /* Three.js Canvas - NOW FOR MAIN CHAT APP */
+            #threeJsCanvas {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: -1;
+                display: none;
+            }
 
-        /* Falling Squares animation for the LOGIN PAGE background */
-        .login-page-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -2; /* Even further behind login content */
-            background: var(--bg-primary); /* Base color for the background behind squares */
-            display: none; /* Controlled by JS to show only on login */
-        }
+            /* Falling Squares animation for the LOGIN PAGE background */
+            .login-page-background {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                z-index: -2;
+                background: var(--bg-primary);
+                /* Removed: display: none !important from here */
+            }
 
-        .login-page-background .square {
-            position: absolute;
-            background: var(--square-color-login);
-            opacity: 0.3; /* Increased opacity for clarity */
-            animation: squareFall 15s linear infinite;
-        }
+            .login-page-background .square {
+                position: absolute;
+                /* The color is set via JS from --square-color-login CSS variable */
+                opacity: 0.3;
+                animation: squareFall 15s linear infinite;
+            }
+
 
         @keyframes squareFall {
             0% {
@@ -1569,8 +1570,8 @@
         }
 
         // Theme Toggle Logic
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
 
         // Check for saved theme preference
         const savedTheme = localStorage.getItem('theme');
@@ -1582,27 +1583,29 @@
             themeToggle.checked = false;
         }
 
-        themeToggle.addEventListener('change', () => {
-            if (themeToggle.checked) {
-                body.classList.add('light-mode');
-                localStorage.setItem('theme', 'light-mode');
-                if (particleMaterial) {
-                    particleMaterial.color.set(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--particle-color-chat')));
+         themeToggle.addEventListener('change', () => {
+                if (themeToggle.checked) { // Switching to Light Mode
+                    body.classList.add('light-mode');
+                    localStorage.setItem('theme', 'light-mode');
+                    if (particleMaterial) {
+                        particleMaterial.color.set(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--particle-color-chat')));
+                    }
+                    // NEW: Always re-create squares on theme change if login page is visible
+                    if (document.getElementById('loginPage').style.display !== 'none') {
+                        window.createFallingSquares(); // Will now create grey squares
+                    }
+                } else { // Switching to Dark Mode
+                    body.classList.remove('light-mode');
+                    localStorage.setItem('theme', 'dark-mode');
+                    if (particleMaterial) {
+                        particleMaterial.color.set(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--particle-color-chat')));
+                    }
+                    // NEW: Always re-create squares on theme change if login page is visible
+                    if (document.getElementById('loginPage').style.display !== 'none') {
+                        window.createFallingSquares(); // Will now create yellow squares
+                    }
                 }
-                if (document.getElementById('loginPageBackground').style.display === 'block') {
-                    window.createFallingSquares();
-                }
-            } else {
-                body.classList.remove('light-mode');
-                localStorage.setItem('theme', 'dark-mode');
-                if (particleMaterial) {
-                    particleMaterial.color.set(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--particle-color-chat')));
-                }
-                if (document.getElementById('loginPageBackground').style.display === 'block') {
-                    window.createFallingSquares();
-                }
-            }
-        });
+            });
 
 
         // Initialize Three.js background for the MAIN CHAT APP
@@ -1802,35 +1805,37 @@
 
 
         // Function to create and manage falling squares for LOGIN PAGE
-        window.createFallingSquares = function() {
-            const container = document.getElementById('loginPageBackground');
-            if (!container) return;
+            window.createFallingSquares = function() {
+                const container = document.getElementById('loginPageBackground');
+                if (!container) return;
 
-            container.innerHTML = '';
-            clearInterval(window.squareInterval);
+                container.innerHTML = '';
+                clearInterval(window.squareInterval);
 
-            const numSquares = 80;
-            const minSize = 15;
-            const maxSize = 50;
-            const squareColor = getComputedStyle(document.documentElement).getPropertyValue('--square-color-login');
+                const numSquares = 80;
+                const minSize = 15;
+                const maxSize = 50;
+                // Get the color dynamically based on current theme variables
+                const squareColor = getComputedStyle(document.documentElement).getPropertyValue('--square-color-login');
 
-            for (let i = 0; i < numSquares; i++) {
-                const square = document.createElement('div');
-                square.className = 'square';
-                const size = Math.random() * (maxSize - minSize) + minSize;
-                const left = Math.random() * 100;
-                const delay = Math.random() * 10;
-                const duration = 10 + Math.random() * 10;
+                for (let i = 0; i < numSquares; i++) {
+                    const square = document.createElement('div');
+                    square.className = 'square';
+                    const size = Math.random() * (maxSize - minSize) + minSize;
+                    const left = Math.random() * 100;
+                    const delay = Math.random() * 10;
+                    const duration = 10 + Math.random() * 10;
 
-                square.style.width = `${size}px`;
-                square.style.height = `${size}px`;
-                square.style.left = `${left}%`;
-                square.style.animationDelay = `${delay}s`;
-                square.style.animationDuration = `${duration}s`;
-                square.style.backgroundColor = squareColor;
-                container.appendChild(square);
+                    square.style.width = `${size}px`;
+                    square.style.height = `${size}px`;
+                    square.style.left = `${left}%`;
+                    square.style.animationDelay = `${delay}s`;
+                    square.style.animationDuration = `${duration}s`;
+                    square.style.backgroundColor = squareColor; // Set color here
+                    container.appendChild(square);
+                }
             }
-        }
+
 
         // --- Local Authentication Functions ---
         function getLocalUsers() {
@@ -1978,41 +1983,42 @@
             window.renderChatHistory(); // Render chat history for the logged-in user
         };
 
-        window.logout = async function() {
-            const confirmed = await window.showConfirm(
-                "Logout Confirmation",
-                "Are you sure you want to end your session and clear local user data?"
-            );
-            if (confirmed) {
-                localStorage.removeItem('loggedInUserEmail'); // Clear login state
-                localStorage.removeItem('currentUserProfile'); // Clear profile
-                localStorage.removeItem('chatHistory'); // Clear chat history
-                localStorage.removeItem('audioEnabled'); // Clear audio preference
+       // Updated logout function
+            window.logout = async function() {
+                const confirmed = await window.showConfirm(
+                    "Logout Confirmation",
+                    "Are you sure you want to end your session and clear local user data?"
+                );
+                if (confirmed) {
+                    localStorage.removeItem('loggedInUserEmail');
+                    localStorage.removeItem('currentUserProfile');
+                    localStorage.removeItem('chatHistory');
+                    localStorage.removeItem('audioEnabled');
 
-                currentUserProfile = null; // Reset current user profile
-                chatHistory = []; // Clear in-memory chat history
-                currentChatId = null; // Reset current chat ID
-                audioEnabled = false; // Reset audio state
+                    currentUserProfile = null;
+                    chatHistory = [];
+                    currentChatId = null;
+                    audioEnabled = false;
 
-                // Clear input fields for next login
-                document.getElementById('loginEmail').value = '';
-                document.getElementById('loginPassword').value = '';
-                document.getElementById('registerUserName').value = '';
-                document.getElementById('registerRollNumber').value = '';
+                    document.getElementById('loginEmail').value = '';
+                    document.getElementById('loginPassword').value = '';
+                    document.getElementById('registerUserName').value = '';
+                    document.getElementById('registerRollNumber').value = '';
 
+                    document.getElementById('chatApp').style.display = 'none';
+                    document.getElementById('moodTopicModal').style.display = 'none';
+                    document.getElementById('loginPage').style.display = 'flex';
 
-                document.getElementById('chatApp').style.display = 'none';
-                document.getElementById('moodTopicModal').style.display = 'none';
-                document.getElementById('loginPage').style.display = 'flex';
-                document.getElementById('loginPageBackground').style.display = 'block';
-                window.createFallingSquares(); // Re-start squares animation for login
+                    // Explicitly show login background and recreate squares on logout
+                    document.getElementById('loginPageBackground').style.display = 'block';
+                    window.createFallingSquares(); // Re-start squares animation for login based on current theme
 
-                document.getElementById('threeJsCanvas').style.display = 'none'; // Ensure canvas is hidden
+                    document.getElementById('threeJsCanvas').style.display = 'none';
 
-                window.renderChatHistory(); // Re-render sidebar (will be empty)
-                scrollToBottom();
-            }
-        };
+                    window.renderChatHistory();
+                    scrollToBottom();
+                }
+            };
 
         // Mood/Topic Selection Logic
         document.querySelectorAll('.mood-option').forEach(button => {
@@ -2042,10 +2048,15 @@
             }
 
             document.getElementById('moodTopicModal').style.display = 'none';
-            document.getElementById('chatApp').style.display = 'grid'; // Display the chat app (full screen)
+                document.getElementById('chatApp').style.display = 'grid';
 
-            initThreeJsBackground(); // Initialize Three.js background for chat
-            document.getElementById('threeJsCanvas').style.display = 'block';
+                initThreeJsBackground();
+                document.getElementById('threeJsCanvas').style.display = 'block';
+
+                // CRITICAL: Ensure login page background is ALWAYS hidden when chat starts
+                document.getElementById('loginPageBackground').style.display = 'none';
+                clearInterval(window.squareInterval); // Stop squares animation
+
 
             document.getElementById('welcomeUserHeader').innerHTML = `
                 <strong>${currentUserProfile.name}</strong><br>
@@ -2797,64 +2808,62 @@
         }
 
         // Initial load logic
-        window.addEventListener('load', () => {
-            // Check if a user is already logged in locally
-            const loggedInEmail = localStorage.getItem('loggedInUserEmail');
-            if (loggedInEmail) {
-                const users = getLocalUsers();
-                const foundUser = users.find(user => user.email === loggedInEmail);
-                if (foundUser) {
-                    currentUserProfile = { name: foundUser.name, roll: foundUser.roll };
-                    // If user is already logged in, skip login page and go straight to mood/topic or chat
-                    document.getElementById('loginPage').style.display = 'none';
-                    document.getElementById('loginPageBackground').style.display = 'none';
-                    clearInterval(window.squareInterval);
+            window.addEventListener('load', () => {
+                const loggedInEmail = localStorage.getItem('loggedInUserEmail');
+                if (loggedInEmail) {
+                    const users = getLocalUsers();
+                    const foundUser = users.find(user => user.email === loggedInEmail);
+                    if (foundUser) {
+                        currentUserProfile = { name: foundUser.name, roll: foundUser.roll };
+                        document.getElementById('loginPage').style.display = 'none';
+                        // CRITICAL: Hide login background explicitly if user is logged in
+                        document.getElementById('loginPageBackground').style.display = 'none';
+                        clearInterval(window.squareInterval);
 
-                    document.getElementById('modalUserName').textContent = currentUserProfile.name.split(' ')[0];
-                    document.getElementById('moodTopicModal').style.display = 'flex';
+                        document.getElementById('modalUserName').textContent = currentUserProfile.name.split(' ')[0];
+                        document.getElementById('moodTopicModal').style.display = 'flex';
 
-                    document.getElementById('chatApp').style.display = 'none'; // Will be shown after mood selection
-                    document.getElementById('threeJsCanvas').style.display = 'none'; // Will be shown after mood selection
+                        document.getElementById('chatApp').style.display = 'none';
+                        document.getElementById('threeJsCanvas').style.display = 'none';
 
-                    document.getElementById('welcomeUserHeader').innerHTML = `
-                        <strong>${currentUserProfile.name}</strong><br>
-                        Roll: ${currentUserProfile.roll}
-                    `;
-                    document.getElementById('welcomeUserSidebar').innerHTML = `
-                        <strong>${currentUserProfile.name}</strong><br>
-                        Roll: ${currentUserProfile.roll}
-                    `;
+                        document.getElementById('welcomeUserHeader').innerHTML = `
+                            <strong>${currentUserProfile.name}</strong><br>
+                            Roll: ${currentUserProfile.roll}
+                        `;
+                        document.getElementById('welcomeUserSidebar').innerHTML = `
+                            <strong>${currentUserProfile.name}</strong><br>
+                            Roll: ${currentUserProfile.roll}
+                        `;
 
+                    } else {
+                        window.showAlert("Session Expired", "Your login session is invalid. Please log in again.");
+                        localStorage.removeItem('loggedInUserEmail');
+                        localStorage.removeItem('currentUserProfile');
+                        document.getElementById('loginPage').style.display = 'flex';
+                        // CRITICAL: Show login background explicitly if showing login page
+                        document.getElementById('loginPageBackground').style.display = 'block';
+                        window.createFallingSquares(); // Will generate squares based on current theme
+                        document.getElementById('moodTopicModal').style.display = 'none';
+                        document.getElementById('chatApp').style.display = 'none';
+                        document.getElementById('threeJsCanvas').style.display = 'none';
+                    }
                 } else {
-                    // Logged in email found, but user data not found (corrupted local storage)
-                    window.showAlert("Session Expired", "Your login session is invalid. Please log in again.");
-                    localStorage.removeItem('loggedInUserEmail');
-                    localStorage.removeItem('currentUserProfile');
                     document.getElementById('loginPage').style.display = 'flex';
+                    // CRITICAL: Show login background explicitly if showing login page
                     document.getElementById('loginPageBackground').style.display = 'block';
-                    window.createFallingSquares();
+                    window.createFallingSquares(); // Will generate squares based on current theme
                     document.getElementById('moodTopicModal').style.display = 'none';
                     document.getElementById('chatApp').style.display = 'none';
                     document.getElementById('threeJsCanvas').style.display = 'none';
                 }
-            } else {
-                // No user logged in, show login page
-                document.getElementById('loginPage').style.display = 'flex';
-                document.getElementById('loginPageBackground').style.display = 'block';
-                window.createFallingSquares();
-                document.getElementById('moodTopicModal').style.display = 'none';
-                document.getElementById('chatApp').style.display = 'none';
-                document.getElementById('threeJsCanvas').style.display = 'none';
-            }
 
-            window.renderChatHistory(); // Always render history (will be empty if not logged in)
-            initSpeechRecognition();
-            updateAudioToggleBtn();
+                window.renderChatHistory();
+                initSpeechRecognition();
+                updateAudioToggleBtn();
 
-            // Ensure login form is the default view on load
-            toggleAuthMode(); // Sets to register
-            toggleAuthMode(); // Sets back to login
-        });
+                toggleAuthMode();
+                toggleAuthMode();
+            });
         // ... existing JS variables and functions ...
 
             function addMessage(content, sender, timestamp, animate = true) {

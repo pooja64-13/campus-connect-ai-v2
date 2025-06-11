@@ -43,6 +43,11 @@
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
+    // Initialize a chat session if it's beneficial for structured queries,
+    // though structured queries are typically single-turn.
+    // If not needed for chat history context, it can be removed.
+    // const chat = model.startChat({ history: [] }); // Moved this to `api/chat` as it makes more sense there.
+
     // Helper function to fetch current news
     async function fetchCurrentNews(query = "top headlines", limit = 3) {
         if (!NEWS_API_KEY) {
@@ -83,7 +88,7 @@
     }
 
 
-   // Endpoint for structured Gemini queries (e.g., for background themes)
+    // Endpoint for structured Gemini queries (e.g., for background themes)
     app.post('/api/gemini-structured-query', async (req, res) => {
         const { prompt, schema } = req.body;
 
@@ -92,13 +97,17 @@
         }
 
         try {
-            // THIS IS THE CRITICAL SECTION TO VERIFY
+            // Re-nesting responseMimeType and responseSchema inside generationConfig
+            // This is crucial for how the @google/generative-ai SDK expects structured output.
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                responseMimeType: "application/json", // <-- MUST BE HERE, NOT NESTED
-                responseSchema: schema                // <-- MUST BE HERE, NOT NESTED
+                generationConfig: { // <-- Keep this object
+                    responseMimeType: "application/json",
+                    responseSchema: schema
+                }
             });
 
+            // The API response for structured output is often directly the JSON string
             const responseJsonString = result.candidates[0].content.parts[0].text;
             const parsedResponse = JSON.parse(responseJsonString);
 
@@ -129,14 +138,12 @@
                 month: 'long',
                 day: 'numeric'
             });
-            // NEW: Simplify time format for better AI parsing, remove timezone if it complicates.
             const currentTime = now.toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: true // Use AM/PM format
+                hour12: true
             });
 
-            // NEW: More explicit context and stronger instruction to use it
             let context = `IMPORTANT CONTEXT: The current date is ${currentDate}. The current time is ${currentTime}. `;
 
             const newsKeywords = ['news', 'current events', 'latest headlines', 'what\'s happening', 'breaking news', 'today\'s news', 'latest news'];
@@ -147,7 +154,6 @@
                 context += `Here is some recent news context: ${newsContent}\n\n`;
             }
 
-            // NEW: Enhanced system instruction with direct directive for time/date
             const systemInstruction = `You are Campus Connect AI, a helpful and friendly academic assistant.
             Your goal is to provide concise, relevant, and accurate answers in a natural, conversational tone.
             **When asked about the current date or time, you MUST use the "IMPORTANT CONTEXT" provided at the beginning of the user's query.**
@@ -159,15 +165,6 @@
             When responding about news, integrate the information smoothly and attribute sources if provided in the context.`;
 
             const finalPromptParts = [{ text: `${systemInstruction}\n\n${context}User's query: ${userMessage}` }];
-
-            const historyForGemini = chatHistory.map(msg => ({
-                role: msg.sender === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.content }]
-            }));
-
-            if (uploadedDocumentText) {
-                finalPromptParts.unshift({ text: `Context from document:\n${uploadedDocumentText}\n\n` });
-            }
 
             const result = await model.generateContent({
                 contents: [...historyForGemini, { role: 'user', parts: finalPromptParts }]

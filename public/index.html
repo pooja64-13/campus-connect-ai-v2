@@ -61,20 +61,20 @@
 
         /* CSS Variables for Theme */
         :root {
-            /* Dark Mode (Default) */
+                /* Dark Mode (Default) */
                 --bg-primary: #0a0a0a;
                 --bg-secondary: #1a1a2e;
                 --bg-tertiary: #16213e; /* Gradient end */
-                --bg-app-overlay: rgba(30, 30, 30, 0.6); /* Increased transparency for animations */
-                --bg-sidebar: rgba(15, 15, 15, 0.7); /* Increased transparency */
-                --bg-header: rgba(25, 25, 25, 0.7); /* Increased transparency */
-                --bg-message-user: rgba(255, 193, 7, 0.1); /* Golden tint, more transparent */
-                --bg-message-bot: rgba(35, 35, 35, 0.5); /* More transparent */
-                --bg-input: rgba(40, 40, 40, 0.6); /* More transparent */
-                --bg-history-item: rgba(30, 30, 30, 0.6); /* More transparent */
-                --bg-typing-indicator: rgba(35, 35, 35, 0.5); /* More transparent */
-                --bg-suggestion: rgba(255, 193, 7, 0.08); /* Golden tint, more transparent */
-                --bg-login-box: rgba(25, 25, 25, 0.6); /* More transparent */
+                --bg-app-overlay: rgba(30, 30, 30, 0.6);
+                --bg-sidebar: rgba(15, 15, 15, 0.7);
+                --bg-header: rgba(25, 25, 25, 0.7);
+                --bg-message-user: rgba(255, 193, 7, 0.1);
+                --bg-message-bot: rgba(35, 35, 35, 0.5);
+                --bg-input: rgba(40, 40, 40, 0.6);
+                --bg-history-item: rgba(30, 30, 30, 0.6);
+                --bg-typing-indicator: rgba(35, 35, 35, 0.5);
+                --bg-suggestion: rgba(255, 193, 7, 0.08);
+                --bg-login-box: rgba(25, 25, 25, 0.6);
 
                 --text-primary: rgba(255, 255, 255, 0.9);
                 --text-secondary: rgba(255, 255, 255, 0.7);
@@ -82,19 +82,17 @@
                 --text-accent: #FFD700; /* Golden color */
                 --text-button-dark: #0a0a0a;
 
-                --border-color: rgba(255, 215, 0, 0.15); /* More subtle golden border */
-                --shadow-color-light: rgba(255, 215, 0, 0.25); /* More subtle golden shadow */
-                --shadow-color-dark: rgba(0, 0, 0, 0.5); /* More subtle shadow */
+                --border-color: rgba(255, 215, 0, 0.15);
+                --shadow-color-light: rgba(255, 215, 0, 0.25);
+                --shadow-color-dark: rgba(0, 0, 0, 0.5);
 
-                /* Three.js Particle color (for Chat App) */
-                --particle-color-chat: #FFD700; /* Golden particles for chat app background */
+                --particle-color-chat: #FFD700;
 
-                /* Falling Squares color (for Login page) */
                 --square-color-login: #FFD700; /* Golden yellow for login squares in dark mode */
 
-                --accent-btn-bg: linear-gradient(135deg, #FFD700, #FFA000); /* Golden gradient */
+                --accent-btn-bg: linear-gradient(135deg, #FFD700, #FFA000);
 
-                --status-online: #4ade80; /* Green */
+                --status-online: #4ade80;
             }
 
             /* Light Mode */
@@ -116,20 +114,19 @@
                 --text-primary: #333;
                 --text-secondary: #555;
                 --text-tertiary: #888;
-                --text-accent: #4682b4; /* Steel blue */
+                --text-accent: #4682b4;
                 --text-button-dark: #f0f2f5;
 
                 --border-color: rgba(70, 130, 180, 0.2);
                 --shadow-color-light: rgba(70, 130, 180, 0.2);
                 --shadow-color-dark: rgba(0, 0, 0, 0.12);
 
-                /* Light mode specific for Three.js (Chat App) */
-                --particle-color-chat: #4682b4; /* Steel blue for chat app Three.js background */
+                --particle-color-chat: #4682b4;
 
-                /* Light mode specific for Falling Squares (Login page) */
                 --square-color-login: #a0a0a0; /* NEW: Darker grey for light mode login squares */
-                --accent-btn-bg: linear-gradient(135deg, #4682b4, #5f9ea0); /* Steel blue gradient */
+                --accent-btn-bg: linear-gradient(135deg, #4682b4, #5f9ea0);
             }
+
 
             /* Base Styles */
             * {
@@ -1569,9 +1566,10 @@
             });
         }
 
-        // Theme Toggle Logic
+       // Theme Toggle Logic
             const themeToggle = document.getElementById('themeToggle');
             const body = document.body;
+
 
         // Check for saved theme preference
         const savedTheme = localStorage.getItem('theme');
@@ -1583,16 +1581,16 @@
             themeToggle.checked = false;
         }
 
-         themeToggle.addEventListener('change', () => {
+          themeToggle.addEventListener('change', () => {
                 if (themeToggle.checked) { // Switching to Light Mode
                     body.classList.add('light-mode');
                     localStorage.setItem('theme', 'light-mode');
                     if (particleMaterial) {
                         particleMaterial.color.set(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--particle-color-chat')));
                     }
-                    // NEW: Always re-create squares on theme change if login page is visible
+                    // CRITICAL: Always re-create squares on theme change if login page is visible
                     if (document.getElementById('loginPage').style.display !== 'none') {
-                        window.createFallingSquares(); // Will now create grey squares
+                        window.createFallingSquares(); // This will now create grey squares in light mode
                     }
                 } else { // Switching to Dark Mode
                     body.classList.remove('light-mode');
@@ -1600,13 +1598,12 @@
                     if (particleMaterial) {
                         particleMaterial.color.set(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--particle-color-chat')));
                     }
-                    // NEW: Always re-create squares on theme change if login page is visible
+                    // CRITICAL: Always re-create squares on theme change if login page is visible
                     if (document.getElementById('loginPage').style.display !== 'none') {
-                        window.createFallingSquares(); // Will now create yellow squares
+                        window.createFallingSquares(); // This will now create yellow squares in dark mode
                     }
                 }
             });
-
 
         // Initialize Three.js background for the MAIN CHAT APP
         function initThreeJsBackground() {
@@ -1804,7 +1801,7 @@
         });
 
 
-        // Function to create and manage falling squares for LOGIN PAGE
+       // Function to create and manage falling squares for LOGIN PAGE
             window.createFallingSquares = function() {
                 const container = document.getElementById('loginPageBackground');
                 if (!container) return;
@@ -1983,7 +1980,7 @@
             window.renderChatHistory(); // Render chat history for the logged-in user
         };
 
-       // Updated logout function
+      // Updated logout function
             window.logout = async function() {
                 const confirmed = await window.showConfirm(
                     "Logout Confirmation",
@@ -2006,6 +2003,10 @@
                     document.getElementById('registerRollNumber').value = '';
 
                     document.getElementById('chatApp').style.display = 'none';
+                    document.getElementById('moodTopicModal').style.display = 'none';
+                    document.getElementById('loginPage').style.display = 'flex';
+
+                     document.getElementById('chatApp').style.display = 'none';
                     document.getElementById('moodTopicModal').style.display = 'none';
                     document.getElementById('loginPage').style.display = 'flex';
 
@@ -2056,7 +2057,6 @@
                 // CRITICAL: Ensure login page background is ALWAYS hidden when chat starts
                 document.getElementById('loginPageBackground').style.display = 'none';
                 clearInterval(window.squareInterval); // Stop squares animation
-
 
             document.getElementById('welcomeUserHeader').innerHTML = `
                 <strong>${currentUserProfile.name}</strong><br>

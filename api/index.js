@@ -83,7 +83,7 @@
     }
 
 
-    // Endpoint for structured Gemini queries (e.g., for background themes)
+   // Endpoint for structured Gemini queries (e.g., for background themes)
     app.post('/api/gemini-structured-query', async (req, res) => {
         const { prompt, schema } = req.body;
 
@@ -92,10 +92,11 @@
         }
 
         try {
+            // THIS IS THE CRITICAL SECTION TO VERIFY
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                responseMimeType: "application/json",
-                responseSchema: schema
+                responseMimeType: "application/json", // <-- MUST BE HERE, NOT NESTED
+                responseSchema: schema                // <-- MUST BE HERE, NOT NESTED
             });
 
             const responseJsonString = result.candidates[0].content.parts[0].text;
@@ -105,8 +106,8 @@
         } catch (error) {
             console.error("Error generating structured content with Gemini:", error);
             if (error.response && error.response.error) {
-                    console.error("Gemini API Error Details:", error.response.error);
-                }
+                console.error("Gemini API Error Details:", error.response.error);
+            }
             res.status(500).json({ error: "Failed to generate structured content.", details: error.message });
         }
     });

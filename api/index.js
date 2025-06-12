@@ -43,11 +43,6 @@
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    // Initialize a chat session if it's beneficial for structured queries,
-    // though structured queries are typically single-turn.
-    // If not needed for chat history context, it can be removed.
-    // const chat = model.startChat({ history: [] }); // Moved this to `api/chat` as it makes more sense there.
-
     // Helper function to fetch current news
     async function fetchCurrentNews(query = "top headlines", limit = 3) {
         if (!NEWS_API_KEY) {
@@ -97,17 +92,14 @@
         }
 
         try {
-            // Re-nesting responseMimeType and responseSchema inside generationConfig
-            // This is crucial for how the @google/generative-ai SDK expects structured output.
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                generationConfig: { // <-- Keep this object
+                generationConfig: {
                     responseMimeType: "application/json",
                     responseSchema: schema
                 }
             });
 
-            // The API response for structured output is often directly the JSON string
             const responseJsonString = result.candidates[0].content.parts[0].text;
             const parsedResponse = JSON.parse(responseJsonString);
 
@@ -164,10 +156,21 @@
             Format your responses using Markdown for clarity (e.g., **bold**, *italics*, lists).
             When responding about news, integrate the information smoothly and attribute sources if provided in the context.`;
 
+            // CRITICAL FIX: Declare historyForGemini before finalPromptParts if it's used there
+            const historyForGemini = chatHistory.map(msg => ({
+                role: msg.sender === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.content }]
+            }));
+
+
             const finalPromptParts = [{ text: `${systemInstruction}\n\n${context}User's query: ${userMessage}` }];
 
+            if (uploadedDocumentText) {
+                finalPromptParts.unshift({ text: `Context from document:\n${uploadedDocumentText}\n\n` });
+            }
+
             const result = await model.generateContent({
-                contents: [...historyForGemini, { role: 'user', parts: finalPromptParts }]
+                contents: [...historyForGemini, { role: 'user', parts: finalPromptParts }] // historyForGemini is used here
             });
             const response = await result.response;
             const text = response.text();

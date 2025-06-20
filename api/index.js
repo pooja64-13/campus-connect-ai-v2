@@ -124,20 +124,28 @@
         }
 
         try {
-            const now = new Date();
-            const currentDate = now.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            const currentTime = now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
+            let context = ''; // Initialize empty context string
 
-            let context = `IMPORTANT CONTEXT: The current date is ${currentDate}. The current time is ${currentTime}. `;
+            // Date/Time context setup
+            const dateTimeKeywords = ['date', 'time', 'today', 'now', 'current date', 'current time'];
+            const isDateTimeQuery = dateTimeKeywords.some(keyword => userMessage.toLowerCase().includes(keyword));
 
+            if (isDateTimeQuery) { // NEW: Only add date/time context if keywords are present
+                const now = new Date();
+                const currentDate = now.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const currentTime = now.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                context += `IMPORTANT CONTEXT: The current date is ${currentDate}. The current time is ${currentTime}. `;
+            }
+
+            // News context setup
             const newsKeywords = ['news', 'current events', 'latest headlines', 'what\'s happening', 'breaking news', 'today\'s news', 'latest news'];
             const isNewsQuery = newsKeywords.some(keyword => userMessage.toLowerCase().includes(keyword));
 
@@ -146,31 +154,30 @@
                 context += `Here is some recent news context: ${newsContent}\n\n`;
             }
 
+            // System instruction for the AI
             const systemInstruction = `You are Campus Connect AI, a helpful and friendly academic assistant.
             Your goal is to provide concise, relevant, and accurate answers in a natural, conversational tone.
-            **When asked about the current date or time, you MUST use the "IMPORTANT CONTEXT" provided at the beginning of the user's query.**
-            Do not use any other date or time knowledge.
+            **If "IMPORTANT CONTEXT" is provided, especially for current date/time or news, you MUST use that information to answer the user's query.**
+            Do not use any other date or time knowledge if context is provided.
             Avoid overly formal or API-like responses. Focus on being approachable and clear.
-            Do not mention your knowledge cutoff. If asked for current information, use the provided context.
-            If the context is insufficient, state that you cannot provide real-time updates.
+            Do not mention your knowledge cutoff.
             Format your responses using Markdown for clarity (e.g., **bold**, *italics*, lists).
             When responding about news, integrate the information smoothly and attribute sources if provided in the context.`;
 
-            // CRITICAL FIX: Declare historyForGemini before finalPromptParts if it's used there
+            // Combine system instruction, context, and user message for the AI prompt
+            const finalPromptParts = [{ text: `${systemInstruction}\n\n${context}User's query: ${userMessage}` }];
+
             const historyForGemini = chatHistory.map(msg => ({
                 role: msg.sender === 'user' ? 'user' : 'model',
                 parts: [{ text: msg.content }]
             }));
-
-
-            const finalPromptParts = [{ text: `${systemInstruction}\n\n${context}User's query: ${userMessage}` }];
 
             if (uploadedDocumentText) {
                 finalPromptParts.unshift({ text: `Context from document:\n${uploadedDocumentText}\n\n` });
             }
 
             const result = await model.generateContent({
-                contents: [...historyForGemini, { role: 'user', parts: finalPromptParts }] // historyForGemini is used here
+                contents: [...historyForGemini, { role: 'user', parts: finalPromptParts }]
             });
             const response = await result.response;
             const text = response.text();

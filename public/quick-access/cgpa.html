@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CGPA & SGPA Calculator (MCET)</title>
+    <link rel="stylesheet" href="../quick-access.css">
+</head>
+
+<body>
+    <div class="page-container">
+
+        <a href="javascript:window.close();" class="back-button">⬅ Back to Chat</a>
+
+        <h1>🧮 SGPA & CGPA Calculator (MCET)</h1>
+
+        <p>This calculator follows the official MCET grading system exactly. Enter your credits and grades to calculate SGPA and CGPA easily.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- SGPA CALCULATOR -->
+        <h2>📘 SGPA Calculator</h2>
+
+        <div class="calc-box">
+            <p><strong>Add each subject with Credits & Grade:</strong></p>
+
+            <div id="sgpa-subjects"></div>
+
+            <button class="small-btn" onclick="addSubject()">+ Add Subject</button>
+
+            <button class="calc-btn" onclick="calculateSGPA()">Calculate SGPA</button>
+
+            <p id="sgpa-result" class="result-text"></p>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- CGPA CALCULATOR -->
+        <h2>📙 CGPA Calculator</h2>
+
+        <div class="calc-box">
+            <p><strong>Add each semester with SGPA & Credits:</strong></p>
+
+            <div id="cgpa-semesters"></div>
+
+            <button class="small-btn" onclick="addSemester()">+ Add Semester</button>
+
+            <button class="calc-btn" onclick="calculateCGPA()">Calculate CGPA</button>
+
+            <p id="cgpa-result" class="result-text"></p>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <h2>📗 MCET Grade Table</h2>
+
+        <table class="grade-table">
+            <tr><th>Percentage</th><th>Grade</th><th>Points</th></tr>
+            <tr><td>≥ 95</td><td>S+</td><td>10</td></tr>
+            <tr><td>≥ 90 &lt; 95</td><td>S</td><td>10</td></tr>
+            <tr><td>≥ 80 &lt; 90</td><td>A</td><td>9</td></tr>
+            <tr><td>≥ 70 &lt; 80</td><td>B</td><td>8</td></tr>
+            <tr><td>≥ 60 &lt; 70</td><td>C</td><td>7</td></tr>
+            <tr><td>≥ 50 &lt; 60</td><td>D</td><td>6</td></tr>
+            <tr><td>≥ 40 &lt; 50</td><td>E</td><td>5</td></tr>
+            <tr><td>&lt; 40</td><td>F</td><td>0</td></tr>
+        </table>
+
+    </div>
+
+    <script>
+        // ---- SGPA SECTION ---- //
+        function addSubject() {
+            const container = document.getElementById("sgpa-subjects");
+
+            const div = document.createElement("div");
+            div.className = "row-item";
+
+            div.innerHTML = `
+                <input type="number" placeholder="Credits" class="input-box credits">
+                <select class="input-box grade">
+                    <option value="">Grade</option>
+                    <option value="10">S+</option>
+                    <option value="10">S</option>
+                    <option value="9">A</option>
+                    <option value="8">B</option>
+                    <option value="7">C</option>
+                    <option value="6">D</option>
+                    <option value="5">E</option>
+                    <option value="0">F</option>
+                </select>
+                <button class="remove-btn" onclick="this.parentElement.remove()">✖</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function calculateSGPA() {
+            const credits = Array.from(document.querySelectorAll(".credits")).map(c => Number(c.value));
+            const grades = Array.from(document.querySelectorAll(".grade")).map(g => Number(g.value));
+
+            let totalCredits = 0;
+            let totalPoints = 0;
+
+            for (let i = 0; i < credits.length; i++) {
+                if (!credits[i] || isNaN(grades[i])) continue;
+                totalCredits += credits[i];
+                totalPoints += credits[i] * grades[i];
+            }
+
+            if (totalCredits === 0) {
+                document.getElementById("sgpa-result").textContent = "Please enter valid subjects.";
+                return;
+            }
+
+            const sgpa = (totalPoints / totalCredits).toFixed(2);
+            document.getElementById("sgpa-result").textContent = `Your SGPA is: ${sgpa}`;
+        }
+
+        // ---- CGPA SECTION ---- //
+        function addSemester() {
+            const container = document.getElementById("cgpa-semesters");
+
+            const div = document.createElement("div");
+            div.className = "row-item";
+
+            div.innerHTML = `
+                <input type="number" placeholder="SGPA" class="input-box sem-sgpa">
+                <input type="number" placeholder="Credits" class="input-box sem-credits">
+                <button class="remove-btn" onclick="this.parentElement.remove()">✖</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function calculateCGPA() {
+            const sgpas = Array.from(document.querySelectorAll(".sem-sgpa")).map(s => Number(s.value));
+            const credits = Array.from(document.querySelectorAll(".sem-credits")).map(c => Number(c.value));
+
+            let totalCredits = 0;
+            let weightedSum = 0;
+
+            for (let i = 0; i < sgpas.length; i++) {
+                if (!sgpas[i] || !credits[i]) continue;
+
+                weightedSum += sgpas[i] * credits[i];
+                totalCredits += credits[i];
+            }
+
+            if (totalCredits === 0) {
+                document.getElementById("cgpa-result").textContent = "Please enter valid data.";
+                return;
+            }
+
+            const cgpa = (weightedSum / totalCredits).toFixed(2);
+            document.getElementById("cgpa-result").textContent = `Your CGPA is: ${cgpa}`;
+        }
+    </script>
+
+</body>
+</html>

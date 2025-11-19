@@ -6,7 +6,6 @@
     <title>Campus Connect AI - Your Academic Companion</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- NEW: Marked.js for Markdown Rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
             /* ... existing CSS ... */
@@ -123,7 +122,7 @@
 
                 --particle-color-chat: #4682b4;
 
-                --square-color-login: #a0a0a0; /* NEW: Darker grey for light mode login squares */
+                --square-color-login: #4da6ff; /* blue squares */
                 --accent-btn-bg: linear-gradient(135deg, #4682b4, #5f9ea0);
             }
 
@@ -136,9 +135,10 @@
             }
 
             html, body {
-                height: 100%;
-                overflow: hidden;
-            }
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
 
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -333,7 +333,7 @@
             display: none; /* Hidden by default, shown by JS */
             position: relative; /* Crucial for z-index and clipping children */
             z-index: 10; /* Make sure it's above other elements */
-            height: 90vh; /* Adjusted for better fit on typical laptops */
+            height: calc(100vh - 20px); /* Adjusted for better fit on typical laptops */
             width: 90vw; /* Adjusted for better fit on typical laptops */
             max-width: 1200px; /* Limit max width for very large screens */
             max-height: 800px; /* Limit max height */
@@ -396,38 +396,118 @@
             color: var(--text-button-dark);
         }
 
+        /* --- NEW: Sidebar Tab Styles --- */
+        .sidebar-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .sidebar-tab {
+            flex: 1;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        /* Style for the inactive tab */
+        .sidebar-tab {
+            background: var(--bg-history-item);
+            color: var(--text-secondary);
+        }
+        /* Style for the active tab (yellow) */
+        .sidebar-tab.active {
+            background: var(--text-accent);
+            color: var(--text-button-dark);
+            box-shadow: 0 0 10px var(--shadow-color-light);
+        }
+        body.light-mode .sidebar-tab.active {
+            background: var(--text-accent);
+            color: var(--text-primary);
+            box-shadow: 0 0 10px var(--shadow-color-light);
+        }
+        body.light-mode .sidebar-tab {
+             background: var(--bg-input);
+             color: var(--text-secondary);
+        }
+
+        /* --- NEW: Quick Access Grid Styles --- */
+        .quick-access-grid {
+            display: none; /* Hide by default, JS will show it */
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            overflow-y: auto;
+            flex: 1; /* Make it take up the remaining space */
+            margin-bottom: 20px; /* Space before theme toggle */
+        }
+        .quick-access-item {
+            background: var(--bg-history-item);
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .quick-access-item span { /* For the emoji/icon */
+            font-size: 24px;
+        }
+        .quick-access-item:hover {
+            background: rgba(50, 50, 50, 0.6);
+            border: 1px solid var(--border-color);
+            transform: translateY(-2px);
+            color: var(--text-primary);
+        }
+        body.light-mode .quick-access-item {
+            background: var(--bg-input);
+        }
+        body.light-mode .quick-access-item:hover {
+            background: rgba(200, 200, 200, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+
         .chat-history {
+            display: none; /* MODIFIED: Hide by default */
             flex: 1;
             overflow-y: auto;
             margin-bottom: 20px;
             padding-right: 10px;
+            flex-direction: column; /* Ensure items stack vertically like a list */
         }
 
+        /* --- MODIFIED: Fixed Scrollbar --- */
         .chat-history::-webkit-scrollbar {
             width: 8px;
         }
-
         .chat-history::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.1); /* Dark scrollbar track */
+            background: rgba(0,0,0,0.1);
             border-radius: 10px;
         }
-
         .chat-history::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.1); /* Light scrollbar thumb */
+            background: rgba(255,255,255,0.1); /* Subtle dark mode thumb */
             border-radius: 10px;
             border: 2px solid transparent;
         }
-
         .chat-history::-webkit-scrollbar-thumb:hover {
             background: rgba(255,255,255,0.2);
         }
-
-        /* Light mode scrollbar */
         body.light-mode .chat-history::-webkit-scrollbar-track {
             background: rgba(0,0,0,0.05);
         }
         body.light-mode .chat-history::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.2); /* Subtle light mode thumb */
         }
         body.light-mode .chat-history::-webkit-scrollbar-thumb:hover {
             background: rgba(0,0,0,0.3);
@@ -443,8 +523,9 @@
             transition: background 0.3s ease;
             font-size: 14px;
             color: var(--text-secondary);
+            /* FIX: Ensure item is a flex container for title and timestamp */
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; 
             align-items: center;
             border: 1px solid transparent;
         }
@@ -465,11 +546,13 @@
             border: 1px solid var(--text-accent);
         }
 
+        /* FIX: Ensure chat history titles don't wrap and use ellipsis */
         .history-item-title {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            flex-grow: 1;
+            flex-grow: 1; /* Allow title to take most of the space */
+            padding-right: 10px; /* Space between title and timestamp */
         }
 
         .history-item-actions {
@@ -577,9 +660,15 @@
             50% { opacity: 0.6; transform: scale(1.2); }
         }
 
-        /* Mobile Menu Toggle (Hamburger Icon) - HIDDEN for laptop-only */
+        /* Mobile Menu Toggle (Hamburger Icon) - Default: Hidden on Desktop */
         .mobile-menu-toggle {
-            display: none;
+            display: none; 
+            background: none;
+            border: none;
+            color: var(--text-accent);
+            cursor: pointer;
+            font-size: 24px;
+            padding: 5px;
         }
 
 
@@ -1265,6 +1354,99 @@
             opacity: 0.9;
             transform: translateY(-1px);
         }
+
+
+        /* ========================================================================= */
+        /* RESPONSIVE MOBILE STYLES                         */
+        /* ========================================================================= */
+        @media (max-width: 768px) {
+            /* General App Scaling */
+            .chat-app {
+                width: 100vw;
+                height: 100vh;
+                max-width: none;
+                max-height: none;
+                border-radius: 0;
+                grid-template-columns: 1fr; /* Single column layout */
+            }
+
+            /* Header Adjustments for Mobile */
+            .header {
+                padding: 10px 15px;
+            }
+            .header h1 {
+                font-size: 18px;
+                display: none; /* Hide main title for space */
+            }
+            .header .top-line {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+            }
+            .header .top-line .left-status {
+                order: 1; /* Move status to the left */
+            }
+            .header .top-line .user-info {
+                order: 2; /* Move user info to the right */
+                display: none; /* Hide detailed user info to save space */
+            }
+            .mobile-menu-toggle {
+                display: block; /* Show hamburger menu button */
+                order: 0; /* Move to the far left */
+            }
+
+            /* Sidebar Overlay and Position */
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 70vw; /* Take up 70% of screen width */
+                height: 100vh;
+                transform: translateX(-100%); /* Start off-screen */
+                transition: transform 0.3s ease-out;
+                z-index: 50; /* Above chat area, below modals */
+                box-shadow: 5px 0 20px rgba(0, 0, 0, 0.5);
+                border-right: none;
+                padding-bottom: 50px; /* Space for theme toggle at bottom */
+            }
+            .sidebar.open {
+                transform: translateX(0); /* Slide in */
+            }
+
+            /* Main Chat Area to cover full screen */
+            .main-chat-area {
+                width: 100%;
+                height: 100%;
+            }
+
+            /* Message Content Sizing */
+            .message-content {
+                max-width: 80%; /* Allow messages to take more width on small screens */
+            }
+
+            /* Action Buttons on Mobile */
+            .action-buttons-container {
+                padding: 0 10px 10px;
+            }
+            .action-button {
+                flex-grow: 1;
+                font-size: 12px;
+                padding: 8px 10px;
+                text-align: center;
+            }
+            
+            /* Input Area Adjustments */
+            .input-area {
+                padding: 10px;
+            }
+        }
+        .square {
+    background-color: var(--square-color-login) !important;
+}
+
+        
+
     </style>
 </head>
 <body>
@@ -1275,7 +1457,7 @@
         <div class="login-container" id="loginPage">
             <div class="login-box">
                 <div class="login-header">
-                    <h1>🎓 Campus Connect AI</h1>
+                    <h1>🎓 Campus Mate</h1>
                     <p id="authPrompt">Login to your account</p>
                 </div>
                 <form id="authForm" onsubmit="event.preventDefault();">
@@ -1288,7 +1470,6 @@
                         <input type="password" id="loginPassword" name="loginPassword" placeholder="Enter your password" required>
                     </div>
 
-                    <!-- Additional fields for registration, hidden by default -->
                     <div class="form-group" id="registerUserNameGroup" style="display: none;">
                         <label for="registerUserName">Full Name</label>
                         <input type="text" id="registerUserName" name="registerUserName" placeholder="Enter your full name">
@@ -1353,11 +1534,44 @@
         <div class="chat-app" id="chatApp">
             <div class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <h2>History</h2>
+                    <h2>Chat Sessions</h2>
                     <button class="new-chat-btn" onclick="startNewChat()">+ New Chat</button>
                 </div>
-                <div class="chat-history" id="chatHistory">
+
+                <div class="sidebar-tabs">
+                    <button class="sidebar-tab" id="tabQuickAccessBtn">Quick Access</button>
+                    <button class="sidebar-tab" id="tabHistoryBtn">History</button>
                 </div>
+
+                <div class="quick-access-grid" id="quickAccessGrid">
+                    <a href="quick-access/course-info.html" class="quick-access-item" target="_blank">
+                        <span>🎓</span> Course Info
+                    </a>
+                    <a href="quick-access/exam-updates.html" class="quick-access-item" target="_blank">
+                        <span>📅</span> Exam Updates
+                    </a>
+                    <a href="quick-access/assignments.html" class="quick-access-item" target="_blank">
+                        <span>📝</span> Assignments
+                    </a>
+                    <a href="quick-access/notes.html" class="quick-access-item" target="_blank">
+                        <span>🗒️</span> Notes
+                    </a>
+                    <!-- DGPA Corrected to CGPA in text -->
+                    <a href="quick-access/cgpa.html" class="quick-access-item" target="_blank">
+                        <span>🧮</span> CGPA Calc
+                    </a>
+                    <a href="quick-access/admissions.html" class="quick-access-item" target="_blank">
+                        <span>🚪</span> Admissions
+                    </a>
+                    <a href="quick-access/attendance.html" class="quick-access-item" target="_blank">
+                        <span>📊</span> Attendance
+                    </a>
+                    <!-- REMOVED: Library section as requested -->
+                </div>
+                
+                <div class="chat-history" id="chatHistory">
+                    </div>
+
                 <div class="theme-toggle-container">
                     <span>Dark Mode</span>
                     <label class="switch">
@@ -1375,8 +1589,16 @@
             <div class="main-chat-area">
                 <div class="header">
                     <div class="top-line">
+                        <!-- Mobile Menu Toggle Button -->
+                        <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </button>
                         <p class="left-status">
-                            <span class="status-indicator"></span>Campus Connect AI
+                            <span class="status-indicator"></span>CampusMate
                         </p>
                         <div class="user-info" id="userInfo">
                             <div id="welcomeUserHeader"></div>
@@ -1413,7 +1635,6 @@
                         ></textarea>
                         <div class="input-actions">
                             <button id="audioToggleBtn" class="audio-toggle-btn">
-                                <!-- SVG icon will be updated by JS -->
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                                     <path d="M11 5L6 9H2v6h4l5 4zM19.07 4.93A10 10 0 0 1 20 12c0 2.21-.9 4.21-2.34 5.66M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                                 </svg>
@@ -1443,7 +1664,8 @@
         // --- CONFIGURATION: Use window.location.origin for absolute path in testing environment ---
         // When deployed on Vercel, requests to /api will automatically route to serverless functions.
         // But in the blob/iframe testing context, we need the full origin.
-        const BACKEND_BASE_URL = window.location.origin + '/api';
+       const BACKEND_BASE_URL = "https://campus-connect-ai-v2.vercel.app/api";
+
 
         // Global variables for user information (no Firebase globals needed)
         let currentUserProfile = null; // Will store name and roll from localStorage
@@ -2071,7 +2293,8 @@
                 const newChat = {
                     id: Date.now().toString(),
                     title: 'New Chat',
-                    messages: []
+                    messages: [],
+                    lastActivity: null // Initialize new field
                 };
                 chatHistory.unshift(newChat);
                 currentChatId = newChat.id;
@@ -2140,6 +2363,13 @@
             }
             return greeting;
         }
+        
+        // Mobile Toggle Sidebar
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
 
         // Chat history management
         window.renderChatHistory = function() {
@@ -2148,14 +2378,35 @@
 
             // Only render chat history if user is logged in
             if (currentUserProfile) {
-                chatHistory.forEach(chat => {
+                // Sort history by last activity time (newest first)
+                const sortedHistory = [...chatHistory].sort((a, b) => {
+                    // Use chat.id (timestamp of creation) as fallback if lastActivity is missing
+                    const timeA = new Date(a.lastActivity ? `1/1/2025 ${a.lastActivity}` : parseInt(a.id));
+                    const timeB = new Date(b.lastActivity ? `1/1/2025 ${b.lastActivity}` : parseInt(b.id));
+                    return timeB - timeA;
+                });
+
+                sortedHistory.forEach(chat => {
                     const historyItem = document.createElement('div');
+                    // Check if the chat has messages/activity to show a cleaner look
+                    const hasActivity = chat.messages.length > 0;
+                    
                     historyItem.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
                     historyItem.dataset.chatId = chat.id;
-                    historyItem.onclick = () => loadChat(chat.id);
+                    historyItem.onclick = () => {
+                        loadChat(chat.id);
+                        // Close sidebar on mobile after selecting chat
+                        if (window.innerWidth <= 768) {
+                             document.getElementById('sidebar').classList.remove('open');
+                        }
+                    };
 
+                    // FIX: Include truncated title and timestamp for the "chat list" look
                     historyItem.innerHTML = `
                         <span class="history-item-title">${chat.title}</span>
+                        <span style="font-size: 11px; opacity: 0.7; color: inherit; flex-shrink: 0; white-space: nowrap;">
+                            ${chat.lastActivity || (hasActivity ? 'N/A' : '')}
+                        </span>
                         <div class="history-item-actions">
                             <button onclick="editChatTitle(event, '${chat.id}')" title="Edit Chat">✏️</button>
                             <button onclick="deleteChat(event, '${chat.id}')" title="Delete Chat">🗑️</button>
@@ -2167,10 +2418,23 @@
         }
 
         async function startNewChat() {
+            // MODIFIED: Switch to history tab when starting a new chat
+            const tabQuickAccessBtn = document.getElementById('tabQuickAccessBtn');
+            const tabHistoryBtn = document.getElementById('tabHistoryBtn');
+            const quickAccessGrid = document.getElementById('quickAccessGrid');
+
+            if (tabQuickAccessBtn) { // Check if elements exist before using them
+                tabQuickAccessBtn.classList.remove('active');
+                tabHistoryBtn.classList.add('active');
+                quickAccessGrid.style.display = 'none';
+                document.getElementById('chatHistory').style.display = 'flex';
+            }
+
             const newChat = {
                 id: Date.now().toString(),
                 title: 'New Chat',
-                messages: []
+                messages: [],
+                lastActivity: null // Initialize new field
             };
             chatHistory.unshift(newChat);
             currentChatId = newChat.id;
@@ -2208,6 +2472,18 @@
         }
 
         function loadChat(chatId) {
+            // MODIFIED: Switch to history tab when loading a chat
+            const tabQuickAccessBtn = document.getElementById('tabQuickAccessBtn');
+            const tabHistoryBtn = document.getElementById('tabHistoryBtn');
+            const quickAccessGrid = document.getElementById('quickAccessGrid');
+
+            if (tabQuickAccessBtn) { // Check if elements exist before using them
+                tabQuickAccessBtn.classList.remove('active');
+                tabHistoryBtn.classList.add('active');
+                quickAccessGrid.style.display = 'none';
+                document.getElementById('chatHistory').style.display = 'flex';
+            }
+
             currentChatId = chatId;
             const chat = chatHistory.find(c => c.id === chatId);
             const messagesContainer = document.getElementById('messages');
@@ -2312,6 +2588,9 @@
             }
 
             const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Save user message immediately to update chat title and lastActivity
+            saveCurrentChatState({ content: `Uploaded: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`, sender: 'user', timestamp: timestamp });
             addMessage(`Uploaded: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`, 'user', timestamp, true);
 
             showTypingIndicator();
@@ -2350,8 +2629,10 @@
                 console.error("Error handling file upload with backend:", error);
                 hideTypingIndicator();
                 const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                addMessage(`Oops! There was an error uploading and processing "${file.name}". Error: ${error.message}. Please ensure your Vercel backend functions are deployed and accessible.`, 'bot', botTimestamp, true);
-                saveCurrentChatState({ content: `Error: ${error.message}`, sender: 'bot', timestamp: botTimestamp });
+                
+                const errorMessage = `Oops! There was an error uploading and processing "${file.name}". Error: ${error.message}. Please ensure your Vercel backend functions are deployed and accessible.`;
+                addMessage(errorMessage, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: errorMessage, sender: 'bot', timestamp: botTimestamp });
             } finally {
                 event.target.value = '';
                 attachButton.disabled = false;
@@ -2372,13 +2653,18 @@
             }
 
             const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            addMessage(userMessage, 'user', timestamp, true);
             
+            // Save the user message to local storage immediately, which also updates the chat title and lastActivity.
+            saveCurrentChatState({ content: userMessage, sender: 'user', timestamp: timestamp });
+
+            addMessage(userMessage, 'user', timestamp, true);
+
             const currentChat = chatHistory.find(c => c.id === currentChatId);
             const messagesForAI = currentChat ? currentChat.messages : [];
 
-            // Add the current user message to the temporary history sent to AI
-            const temporaryMessagesForAI = [...messagesForAI, { content: userMessage, sender: 'user', timestamp: timestamp }];
+            // messagesForAI already includes the current user message due to the saveCurrentChatState call above
+            const temporaryMessagesForAI = [...messagesForAI];
+
 
             input.value = '';
             input.style.height = '20px';
@@ -2411,8 +2697,7 @@
                 hideTypingIndicator();
                 const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 addMessage(botResponse, 'bot', botTimestamp, true);
-                // Save both user and bot messages to local storage
-                saveCurrentChatState({ content: userMessage, sender: 'user', timestamp: timestamp });
+                // Save bot message to local storage
                 saveCurrentChatState({ content: botResponse, sender: 'bot', timestamp: botTimestamp });
 
                 if (audioEnabled) {
@@ -2422,10 +2707,11 @@
             } catch (error) {
                 hideTypingIndicator();
                 const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                addMessage(`Error: ${error.message}. Please ensure your Vercel backend functions are deployed and accessible.`, 'bot', botTimestamp, true);
-                // Save the user message even if bot fails, for debugging/record keeping
-                saveCurrentChatState({ content: userMessage, sender: 'user', timestamp: timestamp });
-                saveCurrentChatState({ content: `Error: ${error.message}`, sender: 'bot', timestamp: botTimestamp });
+                
+                const errorMessage = `Error: ${error.message}. Please ensure your Vercel backend functions are deployed and accessible.`;
+                addMessage(errorMessage, 'bot', botTimestamp, true);
+                // Save the error message
+                saveCurrentChatState({ content: errorMessage, sender: 'bot', timestamp: botTimestamp });
             } finally {
                 sendButton.disabled = false;
                 attachButton.disabled = false;
@@ -2469,13 +2755,15 @@
 
                 hideTypingIndicator();
                 const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                addMessage(`Here's a summary of our current chat:\n\n${summary}`, 'bot', botTimestamp, true);
-                saveCurrentChatState({ content: `Here's a summary of our current chat:\n\n${summary}`, sender: 'bot', timestamp: botTimestamp });
+                const summaryMessage = `Here's a summary of our current chat:\n\n${summary}`;
+                addMessage(summaryMessage, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: summaryMessage, sender: 'bot', timestamp: botTimestamp });
             } catch (error) {
                 hideTypingIndicator();
                 const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                addMessage(`Sorry, I couldn't summarize the chat at the moment. Error: ${error.message}`, 'bot', botTimestamp, true);
-                saveCurrentChatState({ content: `Sorry, I couldn't summarize the chat at the moment. Error: ${error.message}`, sender: 'bot', timestamp: botTimestamp });
+                const errorMessage = `Sorry, I couldn't summarize the chat at the moment. Error: ${error.message}`;
+                addMessage(errorMessage, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: errorMessage, sender: 'bot', timestamp: botTimestamp });
             } finally {
                 summarizeBtn.disabled = false;
             }
@@ -2517,13 +2805,15 @@
 
                 hideTypingIndicator();
                 const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                addMessage(`Here's what I came up with:\n\n${generatedText}`, 'bot', botTimestamp, true);
-                saveCurrentChatState({ content: `Here's what I came up with:\n\n${generatedText}`, sender: 'bot', timestamp: botTimestamp });
+                const creativeMessage = `Here's what I came up with:\n\n${generatedText}`;
+                addMessage(creativeMessage, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: creativeMessage, sender: 'bot', timestamp: botTimestamp });
             } catch (error) {
                 hideTypingIndicator();
                 const botTimestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                addMessage(`Sorry, I couldn't generate creative text at the moment. Error: ${error.message}`, 'bot', botTimestamp, true);
-                saveCurrentChatState({ content: `Sorry, I couldn't generate creative text at the moment. Error: ${error.message}`, sender: 'bot', timestamp: botTimestamp });
+                const errorMessage = `Sorry, I couldn't generate creative text at the moment. Error: ${error.message}`;
+                addMessage(errorMessage, 'bot', botTimestamp, true);
+                saveCurrentChatState({ content: errorMessage, sender: 'bot', timestamp: botTimestamp });
             } finally {
                 creativeBtn.disabled = false;
             }
@@ -2535,7 +2825,10 @@
             if (currentChat) {
                 if (message) {
                     currentChat.messages.push(message);
+                    // FIX 1: Update last activity timestamp for sorting and display
+                    currentChat.lastActivity = message.timestamp; 
                 }
+                // FIX 2: Update chat title when the first user message is received
                 if (currentChat.title === 'New Chat' && currentChat.messages.length > 0) {
                     const firstUserMsg = currentChat.messages.find(msg => msg.sender === 'user');
                     if (firstUserMsg) {
@@ -2559,10 +2852,16 @@
             // Use currentUserProfile.name for user avatar if available
             const avatarContent = sender === 'user' && currentUserProfile && currentUserProfile.name ? currentUserProfile.name.charAt(0).toUpperCase() : '🤖';
 
+            // MODIFIED: Use marked.js to render markdown for bot messages
+            let formattedContent = content;
+            if (sender === 'bot') {
+                formattedContent = marked.parse(content);
+            }
+
             messageDiv.innerHTML = `
                 <div class="message-avatar">${avatarContent}</div>
                 <div class="message-content">
-                    ${content}
+                    ${formattedContent} 
                     <div class="timestamp">${timestamp}</div>
                 </div>
             `;
@@ -2863,38 +3162,56 @@
 
                 toggleAuthMode();
                 toggleAuthMode();
+
+                
+                // --- NEW: Get Sidebar Tab Elements ---
+                const quickAccessGrid = document.getElementById('quickAccessGrid');
+                const chatHistoryEl = document.getElementById('chatHistory');
+                const tabQuickAccessBtn = document.getElementById('tabQuickAccessBtn');
+                const tabHistoryBtn = document.getElementById('tabHistoryBtn');
+
+                // --- NEW: Setup Sidebar Tab Toggling ---
+                if (tabQuickAccessBtn) {
+                    tabQuickAccessBtn.addEventListener('click', () => {
+                        tabQuickAccessBtn.classList.add('active');
+                        tabHistoryBtn.classList.remove('active');
+                        
+                        quickAccessGrid.style.display = 'grid';
+                        chatHistoryEl.style.display = 'none';
+                        
+                        // Close sidebar on mobile when switching tabs
+                        const sidebar = document.getElementById('sidebar');
+                        if (window.innerWidth <= 768) {
+                             sidebar.classList.remove('open');
+                        }
+                    });
+                }
+                
+                if (tabHistoryBtn) {
+                    tabHistoryBtn.addEventListener('click', () => {
+                        tabQuickAccessBtn.classList.remove('active');
+                        tabHistoryBtn.classList.add('active');
+                        
+                        quickAccessGrid.style.display = 'none';
+                        chatHistoryEl.style.display = 'flex'; // Use flex as it's a flex column
+
+                         // Close sidebar on mobile when switching tabs
+                        const sidebar = document.getElementById('sidebar');
+                        if (window.innerWidth <= 768) {
+                             sidebar.classList.remove('open');
+                        }
+                    });
+                }
+
+                // --- NEW: Set Initial Tab State ---
+                // (This will make Quick Access the default active tab)
+                if (tabQuickAccessBtn) {
+                    tabQuickAccessBtn.classList.add('active');
+                    tabHistoryBtn.classList.remove('active');
+                    quickAccessGrid.style.display = 'grid';
+                    chatHistoryEl.style.display = 'none';
+                }
             });
-        // ... existing JS variables and functions ...
-
-            function addMessage(content, sender, timestamp, animate = true) {
-                const messagesContainer = document.getElementById('messages');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${sender}`;
-                if (!animate) {
-                    messageDiv.style.animation = 'none';
-                }
-
-                const avatarContent = sender === 'user' && currentUserProfile && currentUserProfile.name ? currentUserProfile.name.charAt(0).toUpperCase() : '🤖';
-
-                let formattedContent = content;
-                if (sender === 'bot') {
-                    // NEW: Use marked.js to convert Markdown to HTML for bot messages
-                    formattedContent = marked.parse(content);
-                }
-
-                messageDiv.innerHTML = `
-                    <div class="message-avatar">${avatarContent}</div>
-                    <div class="message-content">
-                        ${formattedContent}
-                        <div class="timestamp">${timestamp}</div>
-                    </div>
-                `;
-
-                messagesContainer.appendChild(messageDiv);
-                scrollToBottom();
-            };
-
-            // ... rest of existing JS functions ...
     </script>
 </body>
 </html>

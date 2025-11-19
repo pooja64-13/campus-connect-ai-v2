@@ -1,4 +1,6 @@
     // api/index.js (adapted for Vercel Serverless Function)
+    require('dotenv').config();
+
     const express = require('express');
     const cors = require('cors');
     const multer = require('multer');
@@ -252,6 +254,6 @@
         res.send('Campus Connect AI Backend Serverless Function is running!');
     });
 
-    // --- EXPORT THE EXPRESS APP FOR VERCEL ---
     module.exports = app;
-    
+
+

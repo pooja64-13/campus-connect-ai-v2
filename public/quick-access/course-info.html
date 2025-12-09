@@ -8,16 +8,40 @@
 
 <body>
     <div class="page-container">
-        <a href="javascript:window.close();" class="back-button">⬅ Back to Chat</a>
+
+        <a href="#" class="back-button" onclick="goBackToChat(event)">⬅ Back to Chat</a>
+
+
         <h1>📘 Course Information</h1>
 
         <p>Click below to open your college's course information page:</p>
 
-        <a href="https://methodist.edu.in/meth_academics-methodist-college.php?section=syllabus" class="link-button" target="_blank">
+        <a href="https://methodist.edu.in/meth_academics-methodist-college.php?section=syllabus" 
+           class="link-button" target="_blank">
             Open Course Info Website
         </a>
-       
     </div>
+
+    <script>
+  function goBackToChat(e) {
+    if (e) e.preventDefault();
+
+    // Works inside Android WebView + browser
+    if (window.history.length > 1) {
+      window.history.back();
+
+      setTimeout(() => {
+        if (location.href.includes("quick-access")) {
+          window.location.href = "../index.html";
+        }
+      }, 300);
+
+    } else {
+      // No history → go directly to chat
+      window.location.href = "../index.html";
+    }
+  }
+</script>
+
 </body>
 </html>
-

@@ -8,17 +8,41 @@
 
 <body>
     <div class="page-container">
-        <a href="javascript:window.close();" class="back-button">⬅ Back to Chat</a>
+
+        <a href="#" class="back-button" onclick="goBackToChat(event)">⬅ Back to Chat</a>
+
+
         <h1>📅 Exam Updates</h1>
 
         <p>Click below to view official exam notifications:</p>
 
-        <a href="https://drive.google.com/drive/folders/1095ksomKqueQeERujPoiPn_HiwDetrot?usp=drive_link" class="link-button" target="_blank">
-            Open Exam Updates Website
+        <a href="https://drive.google.com/drive/folders/1095ksomKqueQeERujPoiPn_HiwDetrot?usp=drive_link" 
+           class="link-button" target="_blank">
+            Open Exam Updates Folder
         </a>
-        
-
-
     </div>
+
+    <script>
+  function goBackToChat(e) {
+    if (e) e.preventDefault();
+
+    // Works inside Android WebView + browser
+    if (window.history.length > 1) {
+      window.history.back();
+
+      setTimeout(() => {
+        if (location.href.includes("quick-access")) {
+          window.location.href = "../index.html";
+        }
+      }, 300);
+
+    } else {
+      // No history → go directly to chat
+      window.location.href = "../index.html";
+    }
+  }
+</script>
+
+
 </body>
 </html>

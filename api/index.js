@@ -1,260 +1,181 @@
-    // api/index.js (adapted for Vercel Serverless Function)
-    require('dotenv').config();
+// api/index.js (OpenAI version for Vercel)
+require('dotenv').config();
 
-    const express = require('express');
-    const cors = require('cors');
-    const multer = require('multer');
-    const { PDFLoader } = require('langchain/document_loaders/fs/pdf');
-    const { DocxLoader } = require('langchain/document_loaders/fs/docx');
-    const { TextLoader } = require('langchain/document_loaders/fs/text');
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
+const { PDFLoader } = require('langchain/document_loaders/fs/pdf');
+const { DocxLoader } = require('langchain/document_loaders/fs/docx');
+const { TextLoader } = require('langchain/document_loaders/fs/text');
 
-    const { RecursiveCharacterTextSplitter } = require('langchain/text_splitter');
-    const { GoogleGenerativeAI } = require('@google/generative-ai');
-    const fetch = require('node-fetch');
+const { RecursiveCharacterTextSplitter } = require('langchain/text_splitter');
+const fetch = require('node-fetch');
 
-    // --- CRITICAL PDFLoader Configuration for Vercel ---
-    process.env.LANGCHAIN_PDFJS_PATH = process.env.LANGCHAIN_PDFJS_PATH || '/var/task/node_modules/pdfjs-dist';
+const { OpenAI } = require("openai");
 
-    // --- IMPORTANT: Environment variables ---
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    const NEWS_API_KEY = process.env.NEWS_API_KEY;
+// -------- ENV VARIABLES --------
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
-    if (!GEMINI_API_KEY) {
-        console.error("GEMINI_API_KEY environment variable is not set. Please set it in Vercel project settings.");
-    }
+if (!OPENAI_API_KEY) console.error("❌ OPENAI_API_KEY missing in Vercel settings");
+
+// PDF loader path fix for Vercel
+process.env.LANGCHAIN_PDFJS_PATH = process.env.LANGCHAIN_PDFJS_PATH || '/var/task/node_modules/pdfjs-dist';
+
+// Create OpenAI client
+const client = new OpenAI({
+    apiKey: OPENAI_API_KEY
+});
+
+const app = express();
+
+app.use(cors({ origin: "*", methods: "GET,POST" }));
+app.use(express.json());
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+let uploadedDocumentText = null;
+
+// ------------------ NEWS FETCHER ------------------
+async function fetchCurrentNews(query = "top headlines", limit = 3) {
     if (!NEWS_API_KEY) {
-        console.warn("NEWS_API_KEY environment variable is not set. News functionality will be limited or unavailable.");
+        return "News API key not configured.";
     }
 
+    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=relevancy&language=en&pageSize=${limit}&apiKey=${NEWS_API_KEY}`;
 
-    const app = express();
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
 
-    app.use(cors({
-        origin: '*',
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-        credentials: true,
-        optionsSuccessStatus: 204
-    }));
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-
-    const upload = multer({ storage: multer.memoryStorage() });
-
-    let uploadedDocumentText = null;
-
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-
-    // Helper function to fetch current news
-    async function fetchCurrentNews(query = "top headlines", limit = 3) {
-        if (!NEWS_API_KEY) {
-            console.warn("NEWS_API_KEY is not set. Cannot fetch real-time news.");
-            return "I cannot access real-time news updates at the moment because my news API key is not configured.";
+        if (!data.articles || data.articles.length === 0) {
+            return "No recent news found.";
         }
 
-        const encodedQuery = encodeURIComponent(query);
-        const url = `https://newsapi.org/v2/everything?q=${encodedQuery}&sortBy=relevancy&language=en&pageSize=${limit}&apiKey=${NEWS_API_KEY}`;
+        return data.articles
+            .slice(0, limit)
+            .map((a, i) => `${i + 1}. **${a.title}** - ${a.description || ""}`)
+            .join("\n");
+    } catch (err) {
+        return "Error fetching latest news.";
+    }
+}
 
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                console.error(`News API error: ${response.status} - ${response.statusText}`);
-                const errorText = await response.text();
-                console.error("News API Error Details:", errorText);
-                return "I'm having trouble fetching current news from the news API right now. Please try again later.";
-            }
-            const data = await response.json();
+// ------------------ CHAT ENDPOINT (MAIN AI) ------------------
+app.post('/api/chat', async (req, res) => {
+    const userMessage = req.body.message;
+    const chatHistory = req.body.chatHistory || [];
 
-            if (data.articles && data.articles.length > 0) {
-                let newsSummary = "Here are some recent news headlines:\n";
-                data.articles.forEach((article, index) => {
-                    newsSummary += `${index + 1}. **${article.title}** (Source: ${article.source.name || 'Unknown'})`;
-                    if (article.description) {
-                        newsSummary += `: ${article.description}`;
-                    }
-                    newsSummary += "\n";
-                });
-                return newsSummary;
-            } else {
-                return `I couldn't find any recent news related to "${query}".`;
-            }
-        } catch (error) {
-            console.error("Error fetching news:", error);
-            return "I encountered an error while trying to get the latest news. Please check the backend logs for details.";
-        }
+    if (!userMessage) {
+        return res.status(400).json({ error: "Message is required." });
     }
 
+    try {
+        let context = "";
 
-    // Endpoint for structured Gemini queries (e.g., for background themes)
-    app.post('/api/gemini-structured-query', async (req, res) => {
-        const { prompt, schema } = req.body;
-
-        if (!prompt || !schema) {
-            return res.status(400).json({ error: 'Prompt and schema are required.' });
+        // Date/time context
+        const dateKeywords = ["date", "time", "today", "current"];
+        if (dateKeywords.some(k => userMessage.toLowerCase().includes(k))) {
+            const now = new Date();
+            context += `Current date: ${now.toDateString()}, time: ${now.toLocaleTimeString()}. `;
         }
 
-        try {
-            const result = await model.generateContent({
-                contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: schema
-                }
+        // News context
+        const newsKeywords = ["news", "headlines", "breaking"];
+        if (newsKeywords.some(k => userMessage.toLowerCase().includes(k))) {
+            const newsInfo = await fetchCurrentNews(userMessage);
+            context += `News update:\n${newsInfo}\n\n`;
+        }
+
+        // Build conversation for OpenAI
+        const messages = [
+            {
+                role: "system",
+                content: "You are Campus Connect AI, a friendly academic assistant."
+            }
+        ];
+
+        if (uploadedDocumentText) {
+            messages.push({
+                role: "system",
+                content: `Document context:\n${uploadedDocumentText}`
             });
-
-            const responseJsonString = result.candidates[0].content.parts[0].text;
-            const parsedResponse = JSON.parse(responseJsonString);
-
-            res.json({ data: parsedResponse });
-        } catch (error) {
-            console.error("Error generating structured content with Gemini:", error);
-            if (error.response && error.response.error) {
-                console.error("Gemini API Error Details:", error.response.error);
-            }
-            res.status(500).json({ error: "Failed to generate structured content.", details: error.message });
-        }
-    });
-
-
-    // Endpoint for text generation
-    app.post('/api/chat', async (req, res) => {
-        const userMessage = req.body.message;
-        const chatHistory = req.body.chatHistory || [];
-
-        if (!userMessage) {
-            return res.status(400).json({ error: 'Message is required.' });
         }
 
-        try {
-            let context = ''; // Initialize empty context string
-
-            // Date/Time context setup
-            const dateTimeKeywords = ['date', 'time', 'today', 'now', 'current date', 'current time'];
-            const isDateTimeQuery = dateTimeKeywords.some(keyword => userMessage.toLowerCase().includes(keyword));
-
-            if (isDateTimeQuery) { // NEW: Only add date/time context if keywords are present
-                const now = new Date();
-                const currentDate = now.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                const currentTime = now.toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-                context += `IMPORTANT CONTEXT: The current date is ${currentDate}. The current time is ${currentTime}. `;
-            }
-
-            // News context setup
-            const newsKeywords = ['news', 'current events', 'latest headlines', 'what\'s happening', 'breaking news', 'today\'s news', 'latest news'];
-            const isNewsQuery = newsKeywords.some(keyword => userMessage.toLowerCase().includes(keyword));
-
-            if (isNewsQuery) {
-                const newsContent = await fetchCurrentNews(userMessage);
-                context += `Here is some recent news context: ${newsContent}\n\n`;
-            }
-
-            // System instruction for the AI
-            const systemInstruction = `You are Campus Connect AI, a helpful and friendly academic assistant.
-            Your goal is to provide concise, relevant, and accurate answers in a natural, conversational tone.
-            **If "IMPORTANT CONTEXT" is provided, especially for current date/time or news, you MUST use that information to answer the user's query.**
-            Do not use any other date or time knowledge if context is provided.
-            Avoid overly formal or API-like responses. Focus on being approachable and clear.
-            Do not mention your knowledge cutoff.
-            Format your responses using Markdown for clarity (e.g., **bold**, *italics*, lists).
-            When responding about news, integrate the information smoothly and attribute sources if provided in the context.`;
-
-            // Combine system instruction, context, and user message for the AI prompt
-            const finalPromptParts = [{ text: `${systemInstruction}\n\n${context}User's query: ${userMessage}` }];
-
-            const historyForGemini = chatHistory.map(msg => ({
-                role: msg.sender === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.content }]
-            }));
-
-            if (uploadedDocumentText) {
-                finalPromptParts.unshift({ text: `Context from document:\n${uploadedDocumentText}\n\n` });
-            }
-
-            const result = await model.generateContent({
-                contents: [...historyForGemini, { role: 'user', parts: finalPromptParts }]
+        // Chat history
+        chatHistory.forEach(msg => {
+            messages.push({
+                role: msg.sender === "user" ? "user" : "assistant",
+                content: msg.content
             });
-            const response = await result.response;
-            const text = response.text();
+        });
 
-            res.json({ response: text });
-        } catch (error) {
-            console.error("Error generating content with Gemini:", error);
-            res.status(500).json({ error: "Failed to generate content.", details: error.message });
-        }
-    });
+        messages.push({
+            role: "user",
+            content: context + userMessage
+        });
 
-    // Endpoint for file upload and processing
-    app.post('/api/upload', upload.single('document'), async (req, res) => {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded.' });
-        }
+        // Call OpenAI
+        const completion = await client.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages
+        });
 
-        const fileBuffer = req.file.buffer;
-        const mimeType = req.file.mimetype;
+        res.json({ response: completion.choices[0].message.content });
 
-        if (mimeType !== 'application/pdf' && mimeType !== 'text/plain' && mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-            return res.status(400).json({ error: 'Unsupported file type. Only PDF, TXT, and DOCX are supported.' });
-        }
+    } catch (error) {
+        console.error("OpenAI Error:", error);
+        res.status(500).json({ error: "AI Error", details: error.message });
+    }
+});
 
+// ------------------ DOCUMENT UPLOAD ------------------
+app.post('/api/upload', upload.single('document'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded." });
+
+    const buffer = req.file.buffer;
+    const mime = req.file.mimetype;
+
+    try {
         let loader;
-        try {
-            if (mimeType === 'application/pdf') {
-                const pdfBlob = new Blob([fileBuffer], { type: mimeType });
-                loader = new PDFLoader(pdfBlob);
-            } else if (mimeType === 'text/plain') {
-                const textBlob = new Blob([fileBuffer], { type: mimeType });
-                loader = new TextLoader(textBlob);
-            } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                const docxBlob = new Blob([fileBuffer], { type: mimeType });
-                loader = new DocxLoader(docxBlob);
-            } else {
-                return res.status(400).json({ error: 'Unsupported file type. Only PDF, TXT, and DOCX are supported.' });
-            }
 
-            if (!loader) {
-                return res.status(500).json({ error: 'Failed to initialize document loader.' });
-            }
-
-            const docs = await loader.load();
-
-            if (docs.length === 0) {
-                return res.status(400).json({ message: 'Document contained no readable text.' });
-            }
-
-            const textSplitter = new RecursiveCharacterTextSplitter({
-                chunkSize: 1000,
-                chunkOverlap: 200,
-            });
-            const splitDocs = await textSplitter.splitDocuments(docs);
-            uploadedDocumentText = splitDocs.map(doc => doc.pageContent).join('\n\n');
-
-            res.json({ message: 'Document processed successfully. You can now ask questions about its content.' });
-        } catch (error) {
-            console.error("Error processing document:", error);
-            res.status(500).json({ error: "Failed to process document.", details: error.message });
+        if (mime === "application/pdf") {
+            loader = new PDFLoader(new Blob([buffer]));
+        } else if (mime === "text/plain") {
+            loader = new TextLoader(new Blob([buffer]));
+        } else if (mime.includes("wordprocessingml")) {
+            loader = new DocxLoader(new Blob([buffer]));
+        } else {
+            return res.status(400).json({ error: "Unsupported file format." });
         }
-    });
 
-    // Endpoint to clear document context (important for serverless functions)
-    app.post('/api/clear-document-context', (req, res) => {
-        uploadedDocumentText = null;
-        res.json({ message: 'Document context cleared.' });
-    });
+        const docs = await loader.load();
 
-    // Basic health check endpoint
-    app.get('/api', (req, res) => {
-        res.send('Campus Connect AI Backend Serverless Function is running!');
-    });
+        const splitter = new RecursiveCharacterTextSplitter({
+            chunkSize: 1000,
+            chunkOverlap: 150
+        });
 
-    module.exports = app;
+        const chunks = await splitter.splitDocuments(docs);
+        uploadedDocumentText = chunks.map(c => c.pageContent).join("\n\n");
 
+        res.json({ message: "Document processed successfully!" });
 
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Document parsing failed." });
+    }
+});
+
+// ------------------ CLEAR DOCUMENT CONTEXT ------------------
+app.post("/api/clear-document-context", (req, res) => {
+    uploadedDocumentText = null;
+    res.json({ message: "Document context cleared." });
+});
+
+// ------------------ HEALTH CHECK ------------------
+app.get('/api', (req, res) => {
+    res.send("Campus Connect AI (OpenAI backend) is running!");
+});
+
+module.exports = app;
